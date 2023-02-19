@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::fmt::Debug;
 use async_trait::async_trait;
 use log::{debug, info};
@@ -60,7 +59,7 @@ impl Handler {
                 commands::help::view::handle(request, dependencies).await?
             }
             Ok(Command::PointStory) => {
-                commands::help::view::handle(request, dependencies).await?
+                commands::point_story::view::handle(request, dependencies).await?
             }
             Err(_) => {
                 commands::help::view::handle(request, dependencies).await?

@@ -6,16 +6,22 @@ pub fn validate(request: &MessageRequest) -> Result<(), String> {
     }
 
     let text: &str = request.message.text().unwrap();
-    let mut lines = text.split("\n");
-    if lines.by_ref().count() != 1 {
+    let mut lines = text
+        .split("\n")
+        .map(|x| x.to_string())
+        .collect::<Vec<String>>();
+    if lines.len() != 1 {
         return Err(String::from(
             "Only oneline votes are supported for 'point story' template",
         ));
     }
 
-    let mut lines = text.split("\n");
-    let task_line = lines.next().unwrap();
-    if task_line.split(" ").by_ref().count() <= 1 {
+    let task_line = lines.first().unwrap();
+    let parts = task_line
+        .split(" ")
+        .map(|x| x.to_string())
+        .collect::<Vec<String>>();
+    if parts.len() <= 1 {
         return Err(String::from("Task not placed"));
     }
 

@@ -1,7 +1,7 @@
 mod commands;
 
-pub mod start;
-pub mod point_story;
 pub mod help;
+pub mod point_story;
+pub mod start;
 
 pub use commands::*;

@@ -1,25 +1,27 @@
-use crate::models::point_story::keyboard::KeyboardBuilder;
-use crate::models::point_story::text::Text;
+use crate::views::callback::point_story;
+use crate::views::callback::request::CallbackRequest;
+use crate::views::callback::view::CallbackForTemplate::PointStory;
 use crate::views::handler::Dependencies;
 use crate::views::handler::HandlerResult;
 use crate::views::handler::HandlerTr;
 use async_trait::async_trait;
 use log::{debug, info};
-use std::fmt::Debug;
-use teloxide::payloads::EditMessageTextSetters;
 use teloxide::requests::Requester;
-use teloxide::types::{CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Me, Message};
+use teloxide::types::CallbackQuery;
 use teloxide::Bot;
 
-#[derive(Debug)]
-pub struct CallbackRequest {
-    pub bot: Bot,
-    pub query: CallbackQuery,
+enum CallbackForTemplate {
+    PointStory,
 }
 
-impl CallbackRequest {
-    fn new(bot: Bot, query: CallbackQuery) -> Self {
-        CallbackRequest { bot, query }
+fn detect_callback_template(text: &str) -> Option<CallbackForTemplate> {
+    let lines = text.split("\n").collect::<Vec<&str>>();
+    let line_parts = lines.first().unwrap().split(" ").collect::<Vec<&str>>();
+    let command = line_parts.first().unwrap();
+
+    match command {
+        &"/pointstory" => Some(PointStory),
+        _ => None,
     }
 }
 
@@ -42,32 +44,27 @@ impl HandlerTr<CallbackRequest, Dependencies> for Handler {
             &message,
         );
 
-        self.process(request, dependencies).await?;
+        self.dispatch(request, dependencies).await?;
         Ok(())
     }
 }
 
 impl Handler {
-    async fn process(self, request: CallbackRequest, dependencies: Dependencies) -> HandlerResult {
-        if let Some(pointstory) = &request.query.data {
-            if let Some(message) = request.query.message {
-                let mut new_text =
-                    Text::from_string(&message.text().unwrap_or_default().to_string());
-                new_text.add_ready_user(
-                    request
-                        .query
-                        .from
-                        .mention()
-                        .unwrap_or(request.query.from.full_name()),
-                );
-                request
-                    .bot
-                    .edit_message_text(message.chat.id, message.id, new_text.to_string())
-                    .reply_markup(KeyboardBuilder::make_keyboard())
-                    .await?;
-            }
+    async fn dispatch(self, request: CallbackRequest, dependencies: Dependencies) -> HandlerResult {
+        request
+            .bot
+            .answer_callback_query(request.query.id.clone())
+            .await?;
 
-            request.bot.answer_callback_query(request.query.id).await?;
+        if let Some(message) = &request.query.message {
+            if let Some(text) = message.text() {
+                match detect_callback_template(&text) {
+                    Some(PointStory) => point_story::view::handle(request, dependencies).await?,
+                    None => {
+                        return Ok(());
+                    }
+                }
+            }
         }
 
         Ok(())
@@ -77,7 +74,7 @@ impl Handler {
 pub async fn handle(bot: Bot, query: CallbackQuery) -> HandlerResult {
     let handler = Handler {};
     handler
-        .handle(CallbackRequest::new(bot, query), Dependencies {})
+        .handle(CallbackRequest { bot, query }, Dependencies {})
         .await?;
     Ok(())
 }

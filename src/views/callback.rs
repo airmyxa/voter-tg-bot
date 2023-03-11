@@ -1,2 +1,3 @@
+pub mod point_story;
+pub mod request;
 pub mod view;
-pub use view::handle;

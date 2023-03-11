@@ -15,7 +15,7 @@ async fn main() {
 
     let handler = dptree::entry()
         .branch(Update::filter_message().endpoint(views::message::handle))
-        .branch(Update::filter_callback_query().endpoint(views::callback::handle));
+        .branch(Update::filter_callback_query().endpoint(views::callback::view::handle));
 
     Dispatcher::builder(bot, handler)
         .enable_ctrlc_handler()

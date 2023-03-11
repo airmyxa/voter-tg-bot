@@ -6,7 +6,7 @@ pub fn validate(request: &MessageRequest) -> Result<(), String> {
     }
 
     let text: &str = request.message.text().unwrap();
-    let mut lines = text
+    let lines = text
         .split("\n")
         .map(|x| x.to_string())
         .collect::<Vec<String>>();

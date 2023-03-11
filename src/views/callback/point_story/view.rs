@@ -42,7 +42,7 @@ impl Handler {
                     point_story::story_point::view::handle(request, dependencies).await?
                 }
                 Some(CallbackAction::Dismiss) => {
-                    return Ok(());
+                    point_story::dismiss::view::handle(request, dependencies).await?;
                 }
                 Some(CallbackAction::Open) => {
                     return Ok(());

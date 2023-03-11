@@ -12,7 +12,7 @@ struct Handler {}
 impl HandlerTr<MessageRequest, Dependencies> for Handler {
     async fn handle(self, request: MessageRequest, dependencies: Dependencies)
                     -> HandlerResult {
-        info!("Start handling point story request");
+        info!("Start handling 'point story' request");
         self.send_initial_keyboard_message(request, dependencies).await?;
         Ok(())
     }
@@ -22,7 +22,8 @@ impl Handler {
     async fn send_initial_keyboard_message(self, request: MessageRequest, dependencies: Dependencies)
                                -> HandlerResult {
         let keyboard = keyboard::KeyboardBuilder::make_keyboard();
-        request.bot.send_message(request.message.chat.id, "Choose your option:").reply_markup(keyboard).await?;
+        let text = request.message.text().unwrap_or("");
+        request.bot.send_message(request.message.chat.id, text).reply_markup(keyboard).await?;
         Ok(())
     }
 }

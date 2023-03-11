@@ -36,6 +36,9 @@ struct Handler {}
 impl HandlerTr<MessageRequest, Dependencies> for Handler {
     async fn handle(self, request: MessageRequest, dependencies: Dependencies)
               -> HandlerResult {
+        if request.message.text().is_none() {
+            return Ok(());
+        }
         info!("Start handling message request: {}", request.message.text().unwrap());
         self.dispatch(request, dependencies).await?;
         Ok(())

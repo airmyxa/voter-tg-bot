@@ -6,6 +6,7 @@ use crate::views::handler::HandlerResult;
 use crate::views::handler::HandlerTr;
 use async_trait::async_trait;
 use log::{debug, info};
+use std::ops::Deref;
 use teloxide::payloads::EditMessageTextSetters;
 use teloxide::requests::Requester;
 
@@ -22,6 +23,39 @@ impl HandlerTr<CallbackRequest, Dependencies> for Handler {
 impl Handler {
     async fn process(self, request: CallbackRequest, dependencies: Dependencies) -> HandlerResult {
         if let Some(pointstory) = &request.query.data {
+            dependencies
+                .db
+                .lock()
+                .unwrap()
+                .deref()
+                .requester()
+                .upsert_user_vote(
+                    request
+                        .query
+                        .message
+                        .clone()
+                        .unwrap()
+                        .chat
+                        .id
+                        .to_string()
+                        .clone(),
+                    request
+                        .query
+                        .message
+                        .clone()
+                        .unwrap()
+                        .id
+                        .to_string()
+                        .clone(),
+                    request
+                        .query
+                        .from
+                        .username
+                        .clone()
+                        .unwrap_or(request.query.from.full_name().clone()),
+                    request.query.data.clone().unwrap().clone(),
+                );
+
             if let Some(message) = request.query.message {
                 let mut new_text =
                     Text::from_string(&message.text().unwrap_or_default().to_string());
@@ -48,6 +82,6 @@ impl Handler {
 
 pub async fn handle(request: CallbackRequest, dependencies: Dependencies) -> HandlerResult {
     let handler = Handler {};
-    handler.handle(request, Dependencies {}).await?;
+    handler.handle(request, dependencies).await?;
     Ok(())
 }

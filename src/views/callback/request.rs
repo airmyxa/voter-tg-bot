@@ -8,7 +8,7 @@ pub struct CallbackRequest {
 }
 
 impl CallbackRequest {
-    fn new(bot: Bot, query: CallbackQuery) -> Self {
+    pub fn new(bot: Bot, query: CallbackQuery) -> Self {
         CallbackRequest { bot, query }
     }
 }

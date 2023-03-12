@@ -59,6 +59,6 @@ impl Handler {
 
 pub async fn handle(request: CallbackRequest, dependencies: Dependencies) -> HandlerResult {
     let handler = Handler {};
-    handler.handle(request, Dependencies {}).await?;
+    handler.handle(request, dependencies).await?;
     Ok(())
 }

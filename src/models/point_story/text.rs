@@ -1,6 +1,3 @@
-use std::io::Read;
-use tokio::io::Ready;
-
 type ReadyUsers = Vec<String>;
 
 static READY_USERS_PREFIX: &'static str = "Voted: ";

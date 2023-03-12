@@ -1,3 +1,4 @@
+use crate::db::sqlite::database::{SQLiteConnectionType, SQLiteDb, SQLiteSettings};
 use crate::views;
 use crate::views::commands;
 use crate::views::handler::Dependencies;
@@ -7,6 +8,7 @@ use async_trait::async_trait;
 use commands::Command;
 use log::{debug, info};
 use std::fmt::Debug;
+use std::sync::Arc;
 use teloxide::types::{Me, Message};
 use teloxide::utils::command::BotCommands;
 use teloxide::Bot;
@@ -63,8 +65,13 @@ impl Handler {
 
 pub async fn handle(bot: Bot, message: Message, me: Me) -> HandlerResult {
     let handler = Handler {};
+
+    let dependencies = Dependencies::new(Arc::new(SQLiteDb::connect(SQLiteSettings::new(
+        SQLiteConnectionType::File(String::from("voter.db")),
+    ))));
+
     handler
-        .handle(MessageRequest::new(bot, message, me), Dependencies {})
+        .handle(MessageRequest::new(bot, message, me), dependencies)
         .await?;
     Ok(())
 }

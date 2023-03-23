@@ -1,7 +1,5 @@
-use crate::db::sqlite::requester::SQLiteRequester;
-use rusqlite::{Connection, Statement};
-use std::rc::Rc;
-use std::sync::Arc;
+use rusqlite::Connection;
+use std::sync::{Arc, Mutex, MutexGuard};
 
 pub enum SQLiteConnectionType {
     File(String),
@@ -18,27 +16,43 @@ impl SQLiteSettings {
     }
 }
 
+struct SQLiteConnection {
+    connection: Arc<Mutex<Connection>>,
+}
+
+impl SQLiteConnection {
+    pub fn new(connection: Connection) -> Self {
+        SQLiteConnection {
+            connection: Arc::new(Mutex::new(connection)),
+        }
+    }
+
+    pub fn get(&self) -> MutexGuard<Connection> {
+        return self.connection.lock().unwrap();
+    }
+}
+
+unsafe impl Send for SQLiteConnection {}
+unsafe impl Sync for SQLiteConnection {}
+
 pub struct SQLiteDb {
     settings: SQLiteSettings,
-    connection: Arc<Connection>,
-    requester: SQLiteRequester,
+    connection: SQLiteConnection,
 }
 
 impl SQLiteDb {
-    pub fn connect(settings: SQLiteSettings) -> Self {
+    pub fn new(settings: SQLiteSettings) -> Self {
         let connection = match &settings.connection_type {
             SQLiteConnectionType::Memory => Connection::open_in_memory().unwrap(),
             SQLiteConnectionType::File(file) => Connection::open(&file).unwrap(),
         };
-        let connection = Arc::new(connection);
         SQLiteDb {
             settings,
-            connection: connection.clone(),
-            requester: SQLiteRequester::new(connection.clone()),
+            connection: SQLiteConnection::new(connection),
         }
     }
 
-    pub fn requester<'a>(&'a self) -> &SQLiteRequester {
-        return &self.requester;
+    pub fn get_connection(&self) -> MutexGuard<Connection> {
+        return self.connection.get();
     }
 }

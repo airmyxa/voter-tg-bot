@@ -1,14 +1,15 @@
+mod components;
 mod configuration;
 mod db;
+mod dependencies;
 mod models;
 mod utils;
 mod views;
 
-use crate::db::sqlite::database::{SQLiteConnectionType, SQLiteDb, SQLiteSettings};
-use crate::views::handler::Dependencies;
-use std::ops::Deref;
+use crate::components::create_components;
 use std::sync::Arc;
 use teloxide::prelude::*;
+use teloxide::types::Me;
 
 #[tokio::main]
 async fn main() {
@@ -17,21 +18,20 @@ async fn main() {
 
     let bot = Bot::from_env();
 
-    let dependencies = Dependencies::new(Arc::new(SQLiteDb::connect(SQLiteSettings::new(
-        SQLiteConnectionType::File(String::from("voter.db")),
-    ))));
-
-    dependencies
-        .db
-        .lock()
-        .unwrap()
-        .deref()
-        .requester()
-        .init_db();
+    let components = Arc::new(create_components());
+    let components2 = Arc::clone(&components);
 
     let handler = dptree::entry()
-        .branch(Update::filter_message().endpoint(views::message::handle))
-        .branch(Update::filter_callback_query().endpoint(views::callback::view::handle));
+        .branch(
+            Update::filter_message().endpoint(move |bot: Bot, message: Message, me: Me| {
+                return views::message::handle(bot, message, me, components.dependencies());
+            }),
+        )
+        .branch(
+            Update::filter_callback_query().endpoint(move |bot: Bot, query: CallbackQuery| {
+                return views::callback::view::handle(bot, query, components2.dependencies());
+            }),
+        );
 
     Dispatcher::builder(bot, handler)
         .enable_ctrlc_handler()

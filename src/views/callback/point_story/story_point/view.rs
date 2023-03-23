@@ -1,7 +1,7 @@
+use crate::dependencies::Dependencies;
 use crate::models::point_story::keyboard::KeyboardBuilder;
 use crate::models::point_story::text::Text;
 use crate::views::callback::request::CallbackRequest;
-use crate::views::handler::Dependencies;
 use crate::views::handler::HandlerResult;
 use crate::views::handler::HandlerTr;
 use async_trait::async_trait;
@@ -23,38 +23,32 @@ impl HandlerTr<CallbackRequest, Dependencies> for Handler {
 impl Handler {
     async fn process(self, request: CallbackRequest, dependencies: Dependencies) -> HandlerResult {
         if let Some(pointstory) = &request.query.data {
-            dependencies
-                .db
-                .lock()
-                .unwrap()
-                .deref()
-                .requester()
-                .upsert_user_vote(
-                    request
-                        .query
-                        .message
-                        .clone()
-                        .unwrap()
-                        .chat
-                        .id
-                        .to_string()
-                        .clone(),
-                    request
-                        .query
-                        .message
-                        .clone()
-                        .unwrap()
-                        .id
-                        .to_string()
-                        .clone(),
-                    request
-                        .query
-                        .from
-                        .username
-                        .clone()
-                        .unwrap_or(request.query.from.full_name().clone()),
-                    request.query.data.clone().unwrap().clone(),
-                );
+            dependencies.requester.upsert_user_vote(
+                request
+                    .query
+                    .message
+                    .clone()
+                    .unwrap()
+                    .chat
+                    .id
+                    .to_string()
+                    .clone(),
+                request
+                    .query
+                    .message
+                    .clone()
+                    .unwrap()
+                    .id
+                    .to_string()
+                    .clone(),
+                request
+                    .query
+                    .from
+                    .username
+                    .clone()
+                    .unwrap_or(request.query.from.full_name().clone()),
+                request.query.data.clone().unwrap().clone(),
+            );
 
             if let Some(message) = request.query.message {
                 let mut new_text =

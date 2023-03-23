@@ -1,5 +1,6 @@
+use crate::dependencies::Dependencies;
 use crate::views::commands::Command;
-use crate::views::handler::{Dependencies, HandlerResult, HandlerTr};
+use crate::views::handler::{HandlerResult, HandlerTr};
 use crate::views::message::view::MessageRequest;
 use async_trait::async_trait;
 use log::info;

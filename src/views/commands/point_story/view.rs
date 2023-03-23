@@ -1,7 +1,8 @@
+use crate::dependencies::Dependencies;
 use crate::models::point_story::keyboard::KeyboardBuilder;
 use crate::views::commands::point_story::validator::validate;
 use crate::views::commands::Command;
-use crate::views::handler::{Dependencies, HandlerResult, HandlerTr};
+use crate::views::handler::{HandlerResult, HandlerTr};
 use crate::views::message::view::MessageRequest;
 use async_trait::async_trait;
 use log::info;

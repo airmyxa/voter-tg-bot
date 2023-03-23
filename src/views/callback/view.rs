@@ -1,13 +1,11 @@
-use crate::db::sqlite::database::{SQLiteConnectionType, SQLiteDb, SQLiteSettings};
+use crate::dependencies::Dependencies;
 use crate::views::callback::point_story;
 use crate::views::callback::request::CallbackRequest;
 use crate::views::callback::view::CallbackForTemplate::PointStory;
-use crate::views::handler::Dependencies;
 use crate::views::handler::HandlerResult;
 use crate::views::handler::HandlerTr;
 use async_trait::async_trait;
 use log::{debug, info};
-use std::sync::Arc;
 use teloxide::requests::Requester;
 use teloxide::types::CallbackQuery;
 use teloxide::Bot;
@@ -73,11 +71,7 @@ impl Handler {
     }
 }
 
-pub async fn handle(bot: Bot, query: CallbackQuery) -> HandlerResult {
-    let dependencies = Dependencies::new(Arc::new(SQLiteDb::connect(SQLiteSettings::new(
-        SQLiteConnectionType::File(String::from("voter.db")),
-    ))));
-
+pub async fn handle(bot: Bot, query: CallbackQuery, dependencies: Dependencies) -> HandlerResult {
     let handler = Handler {};
     handler
         .handle(CallbackRequest { bot, query }, dependencies)

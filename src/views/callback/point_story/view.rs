@@ -1,6 +1,6 @@
+use crate::dependencies::Dependencies;
 use crate::views::callback::point_story;
 use crate::views::callback::request::CallbackRequest;
-use crate::views::handler::Dependencies;
 use crate::views::handler::HandlerResult;
 use crate::views::handler::HandlerTr;
 use async_trait::async_trait;

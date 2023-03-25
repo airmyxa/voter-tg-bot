@@ -36,7 +36,6 @@ pub fn create_components() -> Components {
     let requester = Arc::new(create_requester(Arc::clone(&db)));
 
     let dependencies = Arc::new(create_dependencies(Arc::clone(&db), Arc::clone(&requester)));
-    // components.dependencies.set(Some(dependencies));
 
     let components = Components {
         db: Arc::clone(&db),

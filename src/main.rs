@@ -19,17 +19,24 @@ async fn main() {
     let bot = Bot::from_env();
 
     let components = Arc::new(create_components());
-    let components2 = Arc::clone(&components);
+    let components_message = Arc::clone(&components);
+    let components_callback_query = Arc::clone(&components_message);
+
+    // components.dependencies().requester.init_db();
 
     let handler = dptree::entry()
         .branch(
             Update::filter_message().endpoint(move |bot: Bot, message: Message, me: Me| {
-                return views::message::handle(bot, message, me, components.dependencies());
+                return views::message::handle(bot, message, me, components_message.dependencies());
             }),
         )
         .branch(
             Update::filter_callback_query().endpoint(move |bot: Bot, query: CallbackQuery| {
-                return views::callback::view::handle(bot, query, components2.dependencies());
+                return views::callback::view::handle(
+                    bot,
+                    query,
+                    components_callback_query.dependencies(),
+                );
             }),
         );
 

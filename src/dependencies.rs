@@ -8,9 +8,6 @@ pub struct Dependencies {
     pub requester: Arc<SQLiteRequester>,
 }
 
-// unsafe impl Send for Dependencies {}
-// unsafe impl Sync for Dependencies {}
-
 impl Dependencies {
     pub fn new(db: Arc<database::SQLiteDb>, requester: Arc<SQLiteRequester>) -> Self {
         Dependencies { db, requester }

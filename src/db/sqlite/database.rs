@@ -32,9 +32,6 @@ impl SQLiteConnection {
     }
 }
 
-unsafe impl Send for SQLiteConnection {}
-unsafe impl Sync for SQLiteConnection {}
-
 pub struct SQLiteDb {
     settings: SQLiteSettings,
     connection: SQLiteConnection,

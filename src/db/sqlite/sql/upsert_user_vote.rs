@@ -6,9 +6,10 @@
  */
 
 pub static UPSERT_USER_VOTES: &'static str = "\
-insert into votes (chat_id, message_id, user_name, query_data) \
-values (?1, ?2, ?3, ?4) \
-on conflict (chat_id, message_id, user_name) do update \
-set \
-query_data = ?4;\
+insert into user_votes (vote_id, user_name, query_data) \
+select v.id, ?3, ?4 \
+from votes as v \
+where v.chat_id = ?1 and v.message_id = ?2 \
+on conflict (vote_id, user_name) do update \
+set query_data = ?4; \
 ";

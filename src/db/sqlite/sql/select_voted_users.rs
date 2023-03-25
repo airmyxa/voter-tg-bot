@@ -4,7 +4,8 @@
  */
 
 pub static SELECT_VOTED_USERS: &'static str = "\
-select user_name \
-from votes \
-where chat_id = ?1 and message_id = ?2;\
+select uv.vote_id, uv.user_name, uv.query_data \
+from user_votes as uv \
+join votes as v on uv.vote_id = v.id \
+where v.chat_id = ?1 and v.message_id = ?2;\
 ";

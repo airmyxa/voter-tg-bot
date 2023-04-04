@@ -1,6 +1,6 @@
+use crate::dependencies::Dependencies;
 use crate::views::callback::point_story;
 use crate::views::callback::request::CallbackRequest;
-use crate::views::handler::Dependencies;
 use crate::views::handler::HandlerResult;
 use crate::views::handler::HandlerTr;
 use async_trait::async_trait;
@@ -45,7 +45,7 @@ impl Handler {
                     point_story::dismiss::view::handle(request, dependencies).await?;
                 }
                 Some(CallbackAction::Open) => {
-                    return Ok(());
+                    point_story::open::view::handle(request, dependencies).await?;
                 }
                 None => {
                     return Ok(());
@@ -59,6 +59,6 @@ impl Handler {
 
 pub async fn handle(request: CallbackRequest, dependencies: Dependencies) -> HandlerResult {
     let handler = Handler {};
-    handler.handle(request, Dependencies {}).await?;
+    handler.handle(request, dependencies).await?;
     Ok(())
 }

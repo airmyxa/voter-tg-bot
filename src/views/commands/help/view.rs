@@ -1,5 +1,6 @@
+use crate::dependencies::Dependencies;
 use crate::views::commands::Command;
-use crate::views::handler::{Dependencies, HandlerResult, HandlerTr};
+use crate::views::handler::{HandlerResult, HandlerTr};
 use crate::views::message::view::MessageRequest;
 use async_trait::async_trait;
 use log::info;
@@ -13,7 +14,7 @@ impl HandlerTr<MessageRequest, Dependencies> for Handler {
     async fn handle(self, request: MessageRequest, dependencies: Dependencies) -> HandlerResult {
         info!(
             "Start handling help request: {}",
-            request.message.text().unwrap()
+            request.message.text().unwrap_or("")
         );
         self.send_help_message(request, dependencies).await?;
         Ok(())

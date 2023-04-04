@@ -1,12 +1,14 @@
+use crate::dependencies::Dependencies;
 use crate::views;
 use crate::views::commands;
-use crate::views::handler::Dependencies;
 use crate::views::handler::HandlerResult;
 use crate::views::handler::HandlerTr;
 use async_trait::async_trait;
 use commands::Command;
 use log::{debug, info};
 use std::fmt::Debug;
+use std::future::Future;
+use std::pin::Pin;
 use teloxide::types::{Me, Message};
 use teloxide::utils::command::BotCommands;
 use teloxide::Bot;
@@ -61,10 +63,16 @@ impl Handler {
     }
 }
 
-pub async fn handle(bot: Bot, message: Message, me: Me) -> HandlerResult {
+pub async fn handle(
+    bot: Bot,
+    message: Message,
+    me: Me,
+    dependencies: Dependencies,
+) -> HandlerResult {
     let handler = Handler {};
+
     handler
-        .handle(MessageRequest::new(bot, message, me), Dependencies {})
+        .handle(MessageRequest::new(bot, message, me), dependencies)
         .await?;
     Ok(())
 }

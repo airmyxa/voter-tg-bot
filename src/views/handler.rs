@@ -2,7 +2,8 @@ use async_trait::async_trait;
 use std::error::Error;
 use std::fmt::Debug;
 
-pub type HandlerResult = Result<(), Box<dyn Error + Send + Sync>>;
+pub type HandlerErr = Box<dyn Error + Send + Sync>;
+pub type HandlerResult = Result<(), HandlerErr>;
 
 #[async_trait]
 pub trait HandlerTr<R, D>
@@ -11,5 +12,3 @@ where
 {
     async fn handle(self, request: R, dependencies: D) -> HandlerResult;
 }
-
-pub struct Dependencies {}

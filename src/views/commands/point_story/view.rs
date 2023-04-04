@@ -1,12 +1,14 @@
+use crate::dependencies::Dependencies;
 use crate::models::point_story::keyboard::KeyboardBuilder;
 use crate::views::commands::point_story::validator::validate;
 use crate::views::commands::Command;
-use crate::views::handler::{Dependencies, HandlerResult, HandlerTr};
+use crate::views::handler::{HandlerErr, HandlerResult, HandlerTr};
 use crate::views::message::view::MessageRequest;
 use async_trait::async_trait;
 use log::info;
-use teloxide::payloads::SendMessageSetters;
+use teloxide::payloads::{ForwardMessageSetters, SendMessageSetters};
 use teloxide::requests::Requester;
+use teloxide::types::Message;
 use teloxide::utils::command::BotCommands;
 
 struct Handler {}
@@ -25,8 +27,29 @@ impl HandlerTr<MessageRequest, Dependencies> for Handler {
             return Ok(());
         }
 
-        self.send_initial_keyboard_message(request, dependencies)
+        let chat_id = &request.message.chat.id.to_string();
+        let message_id = &request.message.id.to_string();
+        let text = request.message.text().unwrap_or_default().to_string();
+
+        let response = self
+            .send_initial_keyboard_message(request, &dependencies)
             .await?;
+
+        let chat_id = response.chat.id.to_string();
+        let message_id = response.id.to_string();
+
+        info!(
+            "Inserting new vote.\n\
+            chat_id = {}\n\
+            message_id = {}\n\
+            text = {}",
+            chat_id, message_id, text
+        );
+
+        dependencies
+            .requester
+            .insert_vote(&chat_id, &message_id, &text)?;
+
         Ok(())
     }
 }
@@ -35,16 +58,16 @@ impl Handler {
     async fn send_initial_keyboard_message(
         &self,
         request: MessageRequest,
-        dependencies: Dependencies,
-    ) -> HandlerResult {
+        dependencies: &Dependencies,
+    ) -> Result<Message, HandlerErr> {
         let keyboard = KeyboardBuilder::make_keyboard();
         let text = request.message.text().unwrap_or("");
-        request
+        let response = request
             .bot
             .send_message(request.message.chat.id, text)
             .reply_markup(keyboard)
             .await?;
-        Ok(())
+        Ok(response)
     }
 
     async fn send_error_message(

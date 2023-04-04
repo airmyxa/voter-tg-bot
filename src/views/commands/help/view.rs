@@ -14,7 +14,7 @@ impl HandlerTr<MessageRequest, Dependencies> for Handler {
     async fn handle(self, request: MessageRequest, dependencies: Dependencies) -> HandlerResult {
         info!(
             "Start handling help request: {}",
-            request.message.text().unwrap()
+            request.message.text().unwrap_or("")
         );
         self.send_help_message(request, dependencies).await?;
         Ok(())

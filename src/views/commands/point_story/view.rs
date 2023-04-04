@@ -48,7 +48,7 @@ impl HandlerTr<MessageRequest, Dependencies> for Handler {
 
         dependencies
             .requester
-            .insert_vote(&chat_id, &message_id, &text);
+            .insert_vote(&chat_id, &message_id, &text)?;
 
         Ok(())
     }

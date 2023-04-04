@@ -3,6 +3,7 @@ use crate::db::sqlite::requester::SQLiteRequester;
 use crate::dependencies::Dependencies;
 use std::ops::Deref;
 use std::sync::Arc;
+use crate::views::handler::HandlerErr;
 
 pub struct Components {
     db: Arc<SQLiteDb>,
@@ -16,7 +17,7 @@ impl Components {
     }
 }
 
-fn create_db() -> SQLiteDb {
+fn create_db() -> Result<SQLiteDb, HandlerErr> {
     let connection = SQLiteConnectionType::File(String::from("voter.db"));
     let settings = SQLiteSettings::new(connection);
     return SQLiteDb::new(settings);
@@ -30,8 +31,8 @@ fn create_dependencies(db: Arc<SQLiteDb>, requester: Arc<SQLiteRequester>) -> De
     return Dependencies::new(db, requester);
 }
 
-pub fn create_components() -> Components {
-    let db = Arc::new(create_db());
+pub fn create_components() -> Result<Components, HandlerErr> {
+    let db = Arc::new(create_db()?);
 
     let requester = Arc::new(create_requester(Arc::clone(&db)));
 
@@ -43,5 +44,5 @@ pub fn create_components() -> Components {
         dependencies: Arc::clone(&dependencies),
     };
 
-    return components;
+    return Ok(components);
 }

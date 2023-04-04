@@ -41,15 +41,15 @@ impl Handler {
                 .as_ref()
                 .unwrap_or(&request.query.from.full_name()),
             &pointstory,
-        );
+        )?;
 
         let voted_users = dependencies
             .requester
-            .select_voted_users_usernames(&message.chat.id.to_string(), &message.id.to_string());
+            .select_voted_users_usernames(&message.chat.id.to_string(), &message.id.to_string())?;
 
         let vote = dependencies
             .requester
-            .select_vote(&message.chat.id.to_string(), &message.id.to_string());
+            .select_vote(&message.chat.id.to_string(), &message.id.to_string())?;
 
         if vote.is_none() {
             return Err(Box::new(ValidationError::new(String::from(format!(

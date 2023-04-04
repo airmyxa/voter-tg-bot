@@ -26,8 +26,8 @@ impl Handler {
 
         let vote_results = dependencies
             .requester
-            .select_voted_users(&chat_id, &message_id);
-        let vote = dependencies.requester.select_vote(&chat_id, &message_id);
+            .select_voted_users(&chat_id, &message_id)?;
+        let vote = dependencies.requester.select_vote(&chat_id, &message_id)?;
         if vote.is_none() {
             return Err(Box::new(ValidationError::new(String::from(format!(
                 "Cannot find vote with chat_id = {} and message_id = {}",

@@ -7,22 +7,32 @@ mod utils;
 mod views;
 
 use crate::components::create_components;
+use log::error;
 use std::sync::Arc;
 use teloxide::prelude::*;
 use teloxide::types::Me;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), i32> {
     pretty_env_logger::init();
     log::info!("Starting voter bot");
 
     let bot = Bot::from_env();
 
-    let components = Arc::new(create_components());
+    let components = create_components();
+    let components = match components {
+        Err(err) => {
+            error!("Cannot create components: {}", err);
+            return Err(-1);
+        }
+        Ok(components) => components,
+    };
+
+    let components = Arc::new(components);
     let components_message = Arc::clone(&components);
     let components_callback_query = Arc::clone(&components_message);
 
-    // components.dependencies().requester.init_db();
+    // components.dependencies().requester.init_db()?;
 
     let handler = dptree::entry()
         .branch(
@@ -45,4 +55,6 @@ async fn main() {
         .build()
         .dispatch()
         .await;
+
+    Ok(())
 }

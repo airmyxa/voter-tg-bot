@@ -1,3 +1,4 @@
+use crate::views::handler::HandlerErr;
 use rusqlite::Connection;
 use std::sync::{Arc, Mutex, MutexGuard};
 
@@ -38,15 +39,15 @@ pub struct SQLiteDb {
 }
 
 impl SQLiteDb {
-    pub fn new(settings: SQLiteSettings) -> Self {
+    pub fn new(settings: SQLiteSettings) -> Result<Self, HandlerErr> {
         let connection = match &settings.connection_type {
-            SQLiteConnectionType::Memory => Connection::open_in_memory().unwrap(),
-            SQLiteConnectionType::File(file) => Connection::open(&file).unwrap(),
+            SQLiteConnectionType::Memory => Connection::open_in_memory()?,
+            SQLiteConnectionType::File(file) => Connection::open(&file)?,
         };
-        SQLiteDb {
+        Ok(SQLiteDb {
             settings,
             connection: SQLiteConnection::new(connection),
-        }
+        })
     }
 
     pub fn get_connection(&self) -> MutexGuard<Connection> {

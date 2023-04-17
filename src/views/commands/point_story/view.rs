@@ -1,6 +1,6 @@
+use crate::actions;
 use crate::dependencies::Dependencies;
-use crate::models::point_story::keyboard::KeyboardBuilder;
-use crate::views::commands::point_story::validator::validate;
+use crate::models::vote::VoteState;
 use crate::views::commands::Command;
 use crate::views::handler::{HandlerErr, HandlerResult, HandlerTr};
 use crate::views::message::view::MessageRequest;
@@ -20,15 +20,6 @@ impl HandlerTr<MessageRequest, Dependencies> for Handler {
 
         self.delete_user_message(&request, &dependencies).await?;
 
-        let validate_result = validate(&request);
-        if let Err(error_message) = validate_result {
-            self.send_error_message(error_message, request, dependencies)
-                .await?;
-            return Ok(());
-        }
-
-        let chat_id = &request.message.chat.id.to_string();
-        let message_id = &request.message.id.to_string();
         let text = request.message.text().unwrap_or_default().to_string();
 
         let response = self
@@ -60,7 +51,7 @@ impl Handler {
         request: MessageRequest,
         dependencies: &Dependencies,
     ) -> Result<Message, HandlerErr> {
-        let keyboard = KeyboardBuilder::make_keyboard();
+        let keyboard = actions::point_story::make_keyboard(VoteState::Init);
         let text = request.message.text().unwrap_or("");
         let response = request
             .bot

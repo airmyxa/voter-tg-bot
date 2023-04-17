@@ -1,6 +1,7 @@
+use crate::actions;
 use crate::dependencies::Dependencies;
-use crate::models::point_story::keyboard::KeyboardBuilder;
-use crate::models::point_story::text::Text;
+use crate::models::point_story::text::InProgressText;
+use crate::models::vote::VoteState;
 use crate::views::callback::request::CallbackRequest;
 use crate::views::error::ValidationError;
 use crate::views::handler::HandlerResult;
@@ -61,11 +62,14 @@ impl Handler {
 
         let vote = vote.unwrap();
 
-        let new_text = Text::new(vote.text, voted_users);
+        let new_text = InProgressText {
+            task: vote.text,
+            ready_users: voted_users,
+        };
         request
             .bot
             .edit_message_text(message.chat.id, message.id, new_text.to_string())
-            .reply_markup(KeyboardBuilder::make_keyboard())
+            .reply_markup(actions::point_story::make_keyboard(VoteState::InProcess))
             .await?;
 
         request.bot.answer_callback_query(request.query.id).await?;

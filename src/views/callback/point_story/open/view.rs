@@ -37,7 +37,10 @@ impl Handler {
         }
         let vote = vote.unwrap();
 
-        let new_text = ResultText::new(vote.text, vote_results);
+        let new_text = ResultText {
+            text: vote.text,
+            user_votes: vote_results,
+        };
         request
             .bot
             .edit_message_text(message.chat.id, message.id, new_text.to_string())

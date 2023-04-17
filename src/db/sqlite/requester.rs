@@ -1,8 +1,7 @@
 use crate::db::sqlite::database::SQLiteDb;
 use crate::db::sqlite::migrations;
-use crate::db::sqlite::models::user_votes::UserVote;
-use crate::db::sqlite::models::vote::Vote;
 use crate::db::sqlite::sql;
+use crate::models::vote::{UserVote, Vote};
 use crate::views::handler::HandlerErr;
 use log::warn;
 use std::sync::Arc;
@@ -92,7 +91,7 @@ impl SQLiteRequester {
                 return Ok(UserVote {
                     vote_id: vote_id?,
                     username: username?,
-                    query_data: query_data?,
+                    choice: query_data?,
                 });
             })?
             .filter_map(|value| {

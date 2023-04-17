@@ -1,10 +1,12 @@
 mod components;
 mod configuration;
+mod controller;
 mod db;
 mod dependencies;
 mod models;
 mod utils;
 mod views;
+mod actions;
 
 use crate::components::create_components;
 use log::error;

@@ -14,7 +14,7 @@ impl HandlerTr<MessageRequest, Dependencies> for Handler {
     async fn handle(self, request: MessageRequest, dependencies: Dependencies) -> HandlerResult {
         info!(
             "Start handling help request: {}",
-            request.message.text().unwrap_or("")
+            request.message.text().unwrap_or_default()
         );
         self.send_help_message(request, dependencies).await?;
         Ok(())
@@ -22,11 +22,7 @@ impl HandlerTr<MessageRequest, Dependencies> for Handler {
 }
 
 impl Handler {
-    async fn send_help_message(
-        self,
-        request: MessageRequest,
-        dependencies: Dependencies,
-    ) -> HandlerResult {
+    async fn send_help_message(self, request: MessageRequest, _: Dependencies) -> HandlerResult {
         request
             .bot
             .send_message(request.message.chat.id, Command::descriptions().to_string())

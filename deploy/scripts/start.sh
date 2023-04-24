@@ -1,0 +1,1 @@
+python3 ./deploy/scripts/sqlite_migrate.py --connection_file=voter.db

@@ -34,8 +34,6 @@ async fn main() -> Result<(), i32> {
     let components_message = Arc::clone(&components);
     let components_callback_query = Arc::clone(&components_message);
 
-    // components.dependencies().requester.init_db().unwrap();
-
     let handler = dptree::entry()
         .branch(
             Update::filter_message().endpoint(move |bot: Bot, message: Message, me: Me| {

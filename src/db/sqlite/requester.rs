@@ -1,5 +1,4 @@
 use crate::db::sqlite::database::SQLiteDb;
-use crate::db::sqlite::migrations;
 use crate::db::sqlite::sql;
 use crate::models::vote::{UserVote, Vote, VoteTemplate};
 use crate::views::handler::GenericError;
@@ -14,19 +13,6 @@ pub struct SQLiteRequester {
 impl SQLiteRequester {
     pub fn new(db: Arc<SQLiteDb>) -> Self {
         SQLiteRequester { db }
-    }
-
-    pub fn init_db(&self) -> Result<(), GenericError> {
-        self.db
-            .get_connection()?
-            .execute(migrations::CREATE_TABLE_VOTES, ())?;
-        self.db
-            .get_connection()?
-            .execute(migrations::CREATE_TABLE_USER_VOTES, ())?;
-        self.db
-            .get_connection()?
-            .execute(migrations::CREATE_TABLE_VOTE_TEMPLATES, ())?;
-        Ok(())
     }
 
     pub fn insert_vote(

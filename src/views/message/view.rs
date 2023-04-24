@@ -1,7 +1,7 @@
 use crate::dependencies::Dependencies;
 use crate::views::commands;
-use crate::views::handler::HandlerResult;
 use crate::views::handler::HandlerTr;
+use crate::views::handler::MaybeError;
 use async_trait::async_trait;
 use commands::Command;
 use log::{debug, info};
@@ -27,7 +27,7 @@ struct Handler {}
 
 #[async_trait]
 impl HandlerTr<MessageRequest, Dependencies> for Handler {
-    async fn handle(self, request: MessageRequest, dependencies: Dependencies) -> HandlerResult {
+    async fn handle(self, request: MessageRequest, dependencies: Dependencies) -> MaybeError {
         info!(
             "Start handling message request.\
                text={}",
@@ -39,9 +39,9 @@ impl HandlerTr<MessageRequest, Dependencies> for Handler {
 }
 
 impl Handler {
-    async fn dispatch(self, request: MessageRequest, dependencies: Dependencies) -> HandlerResult {
+    async fn dispatch(self, request: MessageRequest, dependencies: Dependencies) -> MaybeError {
         let raw_text = match request.message.text() {
-            None => return Ok(()),
+            None => return commands::help::view::handle(request, dependencies).await,
             Some(value) => value,
         };
 
@@ -49,7 +49,11 @@ impl Handler {
             Ok(Command::Help) => commands::help::view::handle(request, dependencies).await?,
             Ok(Command::Start) => commands::help::view::handle(request, dependencies).await?,
             Ok(Command::PointStory) => {
-                commands::point_story::view::handle(request, dependencies).await?
+                commands::point_story::view::handle(
+                    commands::point_story::view::to_pointstory_request(request)?,
+                    dependencies,
+                )
+                .await?
             }
             Err(_) => commands::help::view::handle(request, dependencies).await?,
         }
@@ -58,12 +62,7 @@ impl Handler {
     }
 }
 
-pub async fn handle(
-    bot: Bot,
-    message: Message,
-    me: Me,
-    dependencies: Dependencies,
-) -> HandlerResult {
+pub async fn handle(bot: Bot, message: Message, me: Me, dependencies: Dependencies) -> MaybeError {
     let handler = Handler {};
 
     handler

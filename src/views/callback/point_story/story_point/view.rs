@@ -4,43 +4,59 @@ use crate::models::point_story::text::InProgressText;
 use crate::models::vote::VoteState;
 use crate::views::callback::request::CallbackRequest;
 use crate::views::error::ValidationError;
-use crate::views::handler::HandlerResult;
-use crate::views::handler::HandlerTr;
+use crate::views::handler::MaybeError;
+use crate::views::handler::{GenericError, HandlerTr};
 use async_trait::async_trait;
 use log::{debug, info};
 use teloxide::payloads::EditMessageTextSetters;
 use teloxide::requests::Requester;
+use teloxide::types::Message;
+
+#[derive(Debug)]
+pub struct StoryPointCallbackRequest {
+    query_data: String,
+    message: Message,
+    extra: CallbackRequest,
+}
 
 struct Handler {}
 
 #[async_trait]
-impl HandlerTr<CallbackRequest, Dependencies> for Handler {
-    async fn handle(self, request: CallbackRequest, dependencies: Dependencies) -> HandlerResult {
+impl HandlerTr<StoryPointCallbackRequest, Dependencies> for Handler {
+    async fn handle(
+        self,
+        request: StoryPointCallbackRequest,
+        dependencies: Dependencies,
+    ) -> MaybeError {
         self.process(request, dependencies).await?;
         Ok(())
     }
 }
 
 impl Handler {
-    async fn process(self, request: CallbackRequest, dependencies: Dependencies) -> HandlerResult {
-        if request.query.data.is_none() {
-            return Err(Box::new(ValidationError::new(String::from(
-                "query.data cannot be None",
-            ))));
-        }
+    async fn process(
+        self,
+        request: StoryPointCallbackRequest,
+        dependencies: Dependencies,
+    ) -> MaybeError {
+        let pointstory = &request.query_data;
+        let message = &request.message;
 
-        let pointstory = &request.query.data.as_ref().unwrap();
-        let message = &request.query.message.as_ref().unwrap();
+        let user = &request.extra.query.from;
+
+        let mut fullname = String::default();
+        let username = match &user.username {
+            Some(username) => username,
+            None => {
+                fullname = user.full_name();
+                &fullname
+            }
+        };
 
         dependencies.requester.upsert_user_vote(
             &message.chat.id.to_string(),
             &message.id.to_string(),
-            &request
-                .query
-                .from
-                .username
-                .as_ref()
-                .unwrap_or(&request.query.from.full_name()),
+            &username,
             &pointstory,
         )?;
 
@@ -52,34 +68,64 @@ impl Handler {
             .requester
             .select_vote(&message.chat.id.to_string(), &message.id.to_string())?;
 
-        if vote.is_none() {
-            return Err(Box::new(ValidationError::new(String::from(format!(
+        let vote = if let Some(vote) = vote {
+            vote
+        } else {
+            return Err(Box::new(ValidationError::new(format!(
                 "Cannot find vote with chat_id = {} and message_id = {}",
                 message.chat.id.to_string(),
                 message.id.to_string()
-            )))));
-        }
-
-        let vote = vote.unwrap();
+            ))));
+        };
 
         let new_text = InProgressText {
             task: vote.text,
             ready_users: voted_users,
         };
         request
+            .extra
             .bot
             .edit_message_text(message.chat.id, message.id, new_text.to_string())
             .reply_markup(actions::point_story::make_keyboard(VoteState::InProcess))
             .await?;
 
-        request.bot.answer_callback_query(request.query.id).await?;
+        request
+            .extra
+            .bot
+            .answer_callback_query(request.extra.query.id)
+            .await?;
 
         Ok(())
     }
 }
 
-pub async fn handle(request: CallbackRequest, dependencies: Dependencies) -> HandlerResult {
+pub async fn handle(request: StoryPointCallbackRequest, dependencies: Dependencies) -> MaybeError {
     let handler = Handler {};
     handler.handle(request, dependencies).await?;
     Ok(())
+}
+
+pub fn to_story_point_request(
+    request: CallbackRequest,
+) -> Result<StoryPointCallbackRequest, GenericError> {
+    let query_data = match &request.query.data {
+        Some(query_data) => query_data,
+        None => {
+            return Err(Box::new(ValidationError::new(String::from(""))));
+        }
+    }
+    .clone();
+    let message = match &request.query.message {
+        Some(message) => message,
+        None => {
+            return Err(Box::new(ValidationError::new(String::from(""))));
+        }
+    }
+    .clone();
+    let result = StoryPointCallbackRequest {
+        query_data,
+        message,
+        extra: request,
+    };
+    return Ok(result);
 }

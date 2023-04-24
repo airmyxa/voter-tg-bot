@@ -1,6 +1,4 @@
-use crate::models::point_story::text::{
-    InProgressText, InitText, ReadyUsers, ResultText, UserVotes,
-};
+use crate::models::point_story::text::{InProgressText, InitText, ResultText, UserVotes};
 use crate::models::vote::{UserVote, VoteState};
 
 pub trait Text: ToString {}
@@ -34,6 +32,7 @@ impl ResultText {
     fn prepare_vote_results(&self) -> String {
         let mut user_results = Vec::<String>::new();
         for UserVote {
+            id,
             vote_id,
             username,
             choice,

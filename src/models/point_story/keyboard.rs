@@ -1,30 +1,13 @@
-use teloxide::types::{InlineKeyboardButton, InlineKeyboardMarkup};
+pub static POINTS: &'static [&'static str] = &["0", "1", "2", "3", "5", "8", "13", "21"];
 
-static POINTS: &'static [&'static str] = &["0", "1", "2", "3", "5", "8", "13", "21"];
+pub static ACTIONS: &'static [&'static str] = &["Open", "Dismiss"];
 
-static ACTIONS: &'static [&'static str] = &["Open", "Dismiss"];
+pub static LOGICAL_KEYBOARD_BLOCKS: &'static [&'static [&'static str]] = &[POINTS, ACTIONS];
 
-static LOGICAL_KEYBOARD_BLOCKS: &'static [&'static [&'static str]] = &[POINTS, ACTIONS];
+pub static ROW_SIZE: usize = 5;
 
-static ROW_SIZE: usize = 5;
+type KeyRow = Vec<String>;
 
-pub struct KeyboardBuilder {}
-
-impl KeyboardBuilder {
-    pub fn make_keyboard() -> InlineKeyboardMarkup {
-        let mut keyboard: Vec<Vec<InlineKeyboardButton>> = vec![];
-
-        for block in LOGICAL_KEYBOARD_BLOCKS {
-            for elems in block.chunks(ROW_SIZE) {
-                let row = elems
-                    .iter()
-                    .map(|&elem| InlineKeyboardButton::callback(elem.to_owned(), elem.to_owned()))
-                    .collect();
-
-                keyboard.push(row);
-            }
-        }
-
-        InlineKeyboardMarkup::new(keyboard)
-    }
+pub struct Keyboard {
+    pub key_rows: Vec<KeyRow>,
 }

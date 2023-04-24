@@ -2,55 +2,89 @@ use crate::dependencies::Dependencies;
 use crate::models::point_story::text::ResultText;
 use crate::views::callback::request::CallbackRequest;
 use crate::views::error::ValidationError;
-use crate::views::handler::HandlerResult;
-use crate::views::handler::HandlerTr;
+use crate::views::handler::MaybeError;
+use crate::views::handler::{GenericError, HandlerTr};
 use async_trait::async_trait;
 use log::{debug, info};
 use teloxide::requests::Requester;
+use teloxide::types::{Message, MessageId};
+
+#[derive(Debug)]
+pub struct OpenCallbackRequest {
+    message: Message,
+    data: CallbackRequest,
+}
 
 struct Handler {}
 
 #[async_trait]
-impl HandlerTr<CallbackRequest, Dependencies> for Handler {
-    async fn handle(self, request: CallbackRequest, dependencies: Dependencies) -> HandlerResult {
+impl HandlerTr<OpenCallbackRequest, Dependencies> for Handler {
+    async fn handle(self, request: OpenCallbackRequest, dependencies: Dependencies) -> MaybeError {
         self.process(request, dependencies).await?;
         Ok(())
     }
 }
 
 impl Handler {
-    async fn process(self, request: CallbackRequest, dependencies: Dependencies) -> HandlerResult {
-        let message = request.query.message.as_ref().unwrap();
-        let chat_id = message.chat.id.to_string();
-        let message_id = message.id.to_string();
+    async fn process(self, request: OpenCallbackRequest, dependencies: Dependencies) -> MaybeError {
+        let chat_id = request.message.chat.id.to_string();
+        let message_id = request.message.id.to_string();
 
         let vote_results = dependencies
             .requester
             .select_voted_users(&chat_id, &message_id)?;
         let vote = dependencies.requester.select_vote(&chat_id, &message_id)?;
-        if vote.is_none() {
+
+        let vote = if let Some(vote) = vote {
+            vote
+        } else {
             return Err(Box::new(ValidationError::new(String::from(format!(
                 "Cannot find vote with chat_id = {} and message_id = {}",
-                message.chat.id.to_string(),
-                message.id.to_string()
+                chat_id, message_id
             )))));
-        }
-        let vote = vote.unwrap();
+        };
 
-        let new_text = ResultText::new(vote.text, vote_results);
+        let new_text = ResultText {
+            text: vote.text,
+            user_votes: vote_results,
+        };
+
         request
+            .data
             .bot
-            .edit_message_text(message.chat.id, message.id, new_text.to_string())
+            .edit_message_text(chat_id, request.message.id, new_text.to_string())
             .await?;
 
-        request.bot.answer_callback_query(request.query.id).await?;
+        request
+            .data
+            .bot
+            .answer_callback_query(request.data.query.id)
+            .await?;
 
         Ok(())
     }
 }
 
-pub async fn handle(request: CallbackRequest, dependencies: Dependencies) -> HandlerResult {
+pub async fn handle(request: OpenCallbackRequest, dependencies: Dependencies) -> MaybeError {
     let handler = Handler {};
     handler.handle(request, dependencies).await?;
     Ok(())
+}
+
+pub fn to_open_callback_request(
+    request: CallbackRequest,
+) -> Result<OpenCallbackRequest, GenericError> {
+    return match &request.query.message {
+        Some(message) => {
+            let query_id = request.query.id.clone();
+            let result = OpenCallbackRequest {
+                message: message.clone(),
+                data: request,
+            };
+            Ok(result)
+        }
+        None => Err(Box::new(ValidationError::new(String::from(
+            "Open callback request parse error. Text is required field.",
+        )))),
+    };
 }

@@ -4,7 +4,7 @@
  */
 
 pub static SELECT_VOTE: &'static str = "\
-select id, chat_id, message_id, text \
+select id, chat_id, message_id, text, template_id \
 from votes \
 where chat_id = ?1 and message_id = ?2;\
 ";

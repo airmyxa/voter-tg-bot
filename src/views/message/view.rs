@@ -1,14 +1,11 @@
 use crate::dependencies::Dependencies;
-use crate::views;
 use crate::views::commands;
-use crate::views::handler::HandlerResult;
 use crate::views::handler::HandlerTr;
+use crate::views::handler::MaybeError;
 use async_trait::async_trait;
 use commands::Command;
 use log::{debug, info};
 use std::fmt::Debug;
-use std::future::Future;
-use std::pin::Pin;
 use teloxide::types::{Me, Message};
 use teloxide::utils::command::BotCommands;
 use teloxide::Bot;
@@ -30,11 +27,11 @@ struct Handler {}
 
 #[async_trait]
 impl HandlerTr<MessageRequest, Dependencies> for Handler {
-    async fn handle(self, request: MessageRequest, dependencies: Dependencies) -> HandlerResult {
+    async fn handle(self, request: MessageRequest, dependencies: Dependencies) -> MaybeError {
         info!(
             "Start handling message request.\
                text={}",
-            request.message.text().unwrap_or("")
+            request.message.text().unwrap_or_default()
         );
         self.dispatch(request, dependencies).await?;
         Ok(())
@@ -42,19 +39,21 @@ impl HandlerTr<MessageRequest, Dependencies> for Handler {
 }
 
 impl Handler {
-    async fn dispatch(self, request: MessageRequest, dependencies: Dependencies) -> HandlerResult {
-        let raw_text = request.message.text();
-        if raw_text.is_none() {
-            views::commands::help::view::handle(request, dependencies).await?;
-            return Ok(());
-        }
+    async fn dispatch(self, request: MessageRequest, dependencies: Dependencies) -> MaybeError {
+        let raw_text = match request.message.text() {
+            None => return commands::help::view::handle(request, dependencies).await,
+            Some(value) => value,
+        };
 
-        let raw_text = raw_text.unwrap();
         match BotCommands::parse(raw_text, request.me.username()) {
             Ok(Command::Help) => commands::help::view::handle(request, dependencies).await?,
             Ok(Command::Start) => commands::help::view::handle(request, dependencies).await?,
             Ok(Command::PointStory) => {
-                commands::point_story::view::handle(request, dependencies).await?
+                commands::point_story::view::handle(
+                    commands::point_story::view::to_pointstory_request(request)?,
+                    dependencies,
+                )
+                .await?
             }
             Err(_) => commands::help::view::handle(request, dependencies).await?,
         }
@@ -63,12 +62,7 @@ impl Handler {
     }
 }
 
-pub async fn handle(
-    bot: Bot,
-    message: Message,
-    me: Me,
-    dependencies: Dependencies,
-) -> HandlerResult {
+pub async fn handle(bot: Bot, message: Message, me: Me, dependencies: Dependencies) -> MaybeError {
     let handler = Handler {};
 
     handler

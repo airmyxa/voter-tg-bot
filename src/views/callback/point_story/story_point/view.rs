@@ -111,14 +111,18 @@ pub fn to_story_point_request(
     let query_data = match &request.query.data {
         Some(query_data) => query_data,
         None => {
-            return Err(Box::new(ValidationError::new(String::from(""))));
+            return Err(Box::new(ValidationError::new(String::from(
+                "Cannot process vote without query data",
+            ))));
         }
     }
     .clone();
     let message = match &request.query.message {
         Some(message) => message,
         None => {
-            return Err(Box::new(ValidationError::new(String::from(""))));
+            return Err(Box::new(ValidationError::new(String::from(
+                "Cannot process vote without message object",
+            ))));
         }
     }
     .clone();

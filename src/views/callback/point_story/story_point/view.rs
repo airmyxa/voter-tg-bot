@@ -7,7 +7,6 @@ use crate::views::error::ValidationError;
 use crate::views::handler::MaybeError;
 use crate::views::handler::{GenericError, HandlerTr};
 use async_trait::async_trait;
-use log::{debug, info};
 use teloxide::payloads::EditMessageTextSetters;
 use teloxide::requests::Requester;
 use teloxide::types::Message;
@@ -44,13 +43,9 @@ impl Handler {
 
         let user = &request.extra.query.from;
 
-        let mut fullname = String::default();
         let username = match &user.username {
-            Some(username) => username,
-            None => {
-                fullname = user.full_name();
-                &fullname
-            }
+            Some(username) => username.clone(),
+            None => user.full_name(),
         };
 
         dependencies.requester.upsert_user_vote(

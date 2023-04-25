@@ -1,6 +1,4 @@
-use teloxide::types::{Me, Message};
 use teloxide::utils::command::BotCommands;
-use teloxide::Bot;
 
 #[derive(BotCommands)]
 #[command(

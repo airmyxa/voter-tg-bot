@@ -5,9 +5,8 @@ use crate::views::error::ValidationError;
 use crate::views::handler::MaybeError;
 use crate::views::handler::{GenericError, HandlerTr};
 use async_trait::async_trait;
-use log::{debug, info};
 use teloxide::requests::Requester;
-use teloxide::types::{Message, MessageId};
+use teloxide::types::Message;
 
 #[derive(Debug)]
 pub struct OpenCallbackRequest {
@@ -76,7 +75,6 @@ pub fn to_open_callback_request(
 ) -> Result<OpenCallbackRequest, GenericError> {
     return match &request.query.message {
         Some(message) => {
-            let query_id = request.query.id.clone();
             let result = OpenCallbackRequest {
                 message: message.clone(),
                 data: request,

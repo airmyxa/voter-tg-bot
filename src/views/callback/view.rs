@@ -6,7 +6,7 @@ use crate::views::error::ValidationError;
 use crate::views::handler::MaybeError;
 use crate::views::handler::{GenericError, HandlerTr};
 use async_trait::async_trait;
-use log::{debug, info, warn};
+use log::info;
 use teloxide::requests::Requester;
 use teloxide::types::CallbackQuery;
 use teloxide::Bot;
@@ -70,10 +70,8 @@ impl Handler {
             .answer_callback_query(request.query.id.clone())
             .await?;
 
-        if let Some(text) = request.message.text() {
-            match self.get_message_template(&request, &dependencies)? {
-                PointStory => point_story::view::handle(request, dependencies).await?,
-            }
+        match self.get_message_template(&request, &dependencies)? {
+            PointStory => point_story::view::handle(request, dependencies).await?,
         }
 
         Ok(())

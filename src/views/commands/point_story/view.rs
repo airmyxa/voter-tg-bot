@@ -12,6 +12,7 @@ use teloxide::types::{Me, Message};
 use teloxide::Bot;
 
 #[derive(Debug)]
+#[allow(dead_code)]
 struct PointStoryRequestData {
     pub bot: Bot,
     pub message: Message,
@@ -63,7 +64,7 @@ impl Handler {
     async fn send_initial_keyboard_message(
         &self,
         request: &PointStoryRequest,
-        dependencies: &Dependencies,
+        _: &Dependencies,
     ) -> Result<Message, GenericError> {
         let keyboard = actions::point_story::make_keyboard(VoteState::Init);
         let text = &request.text;
@@ -79,7 +80,7 @@ impl Handler {
     async fn delete_user_message(
         &self,
         request: &PointStoryRequest,
-        dependencies: &Dependencies,
+        _: &Dependencies,
     ) -> MaybeError {
         request
             .data

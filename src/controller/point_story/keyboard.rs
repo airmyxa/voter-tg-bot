@@ -14,7 +14,6 @@ impl KeyboardBuilder {
         return match self.state {
             VoteState::Init => self.build_init_keyboard(),
             VoteState::InProcess => self.build_init_keyboard(),
-            VoteState::Finished => self.build_init_keyboard(),
         };
     }
 

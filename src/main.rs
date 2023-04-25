@@ -1,11 +1,9 @@
 mod actions;
 mod components;
-mod configuration;
 mod controller;
 mod db;
 mod dependencies;
 mod models;
-mod utils;
 mod views;
 
 use crate::components::create_components;

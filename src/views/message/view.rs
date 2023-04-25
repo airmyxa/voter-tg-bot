@@ -4,7 +4,7 @@ use crate::views::handler::HandlerTr;
 use crate::views::handler::MaybeError;
 use async_trait::async_trait;
 use commands::Command;
-use log::{debug, info};
+use log::info;
 use std::fmt::Debug;
 use teloxide::types::{Me, Message};
 use teloxide::utils::command::BotCommands;

@@ -5,6 +5,7 @@ use crate::views::handler::GenericError;
 use std::ops::Deref;
 use std::sync::Arc;
 
+#[allow(dead_code)]
 pub struct Components {
     db: Arc<SQLiteDb>,
     requester: Arc<SQLiteRequester>,

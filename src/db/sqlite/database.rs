@@ -1,9 +1,9 @@
 use crate::views::error::RuntimeError;
-use crate::views::handler::{GenericError, MaybeError};
-use log::error;
+use crate::views::handler::GenericError;
 use rusqlite::Connection;
-use std::sync::{Arc, LockResult, Mutex, MutexGuard};
+use std::sync::{Arc, Mutex, MutexGuard};
 
+#[allow(dead_code)]
 pub enum SQLiteConnectionType {
     File(String),
     Memory,
@@ -44,6 +44,7 @@ impl SQLiteConnection {
     }
 }
 
+#[allow(dead_code)]
 pub struct SQLiteDb {
     settings: SQLiteSettings,
     connection: SQLiteConnection,

@@ -3,7 +3,6 @@ use crate::views::callback::request::CallbackRequest;
 use crate::views::handler::HandlerTr;
 use crate::views::handler::MaybeError;
 use async_trait::async_trait;
-use log::{debug, info};
 use teloxide::requests::Requester;
 
 struct Handler {}
@@ -17,7 +16,7 @@ impl HandlerTr<CallbackRequest, Dependencies> for Handler {
 }
 
 impl Handler {
-    async fn process(self, request: CallbackRequest, dependencies: Dependencies) -> MaybeError {
+    async fn process(self, request: CallbackRequest, _: Dependencies) -> MaybeError {
         if let Some(message) = request.query.message {
             request
                 .bot

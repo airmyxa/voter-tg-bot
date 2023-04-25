@@ -6,7 +6,6 @@ use crate::views::callback::request::CallbackRequest;
 use crate::views::handler::HandlerTr;
 use crate::views::handler::MaybeError;
 use async_trait::async_trait;
-use log::{debug, info};
 
 enum CallbackAction {
     PointStory,

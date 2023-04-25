@@ -1,7 +1,6 @@
 pub enum VoteState {
     Init,
     InProcess,
-    Finished,
 }
 
 pub struct VoteTemplate {

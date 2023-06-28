@@ -68,12 +68,13 @@ impl Handler {
     ) -> Result<Message, GenericError> {
         let keyboard = actions::point_story::make_keyboard(VoteState::Init);
         let text = &request.text;
-        let response = request
+        let mut response = request
             .data
             .bot
             .send_message(request.data.message.chat.id, text)
-            .reply_markup(keyboard)
-            .await?;
+            .reply_markup(keyboard);
+        response.message_thread_id = request.data.message.thread_id.clone();
+        let response = response.await?;
         Ok(response)
     }
 

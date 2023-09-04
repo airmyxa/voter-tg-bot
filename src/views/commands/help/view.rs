@@ -4,7 +4,6 @@ use crate::views::handler::{HandlerTr, MaybeError};
 use crate::views::message::view::MessageRequest;
 use async_trait::async_trait;
 use log::info;
-use teloxide::payloads::{SendInvoiceSetters, SendMessageSetters};
 use teloxide::requests::Requester;
 use teloxide::utils::command::BotCommands;
 

@@ -1,3 +1,4 @@
+use crate::components_container::{ComponentTr, ComponentsContainer};
 use crate::db::sqlite::database;
 use crate::db::sqlite::requester::SQLiteRequester;
 use std::sync::Arc;
@@ -8,8 +9,17 @@ pub struct Dependencies {
     pub requester: Arc<SQLiteRequester>,
 }
 
-impl Dependencies {
-    pub fn new(db: Arc<database::SQLiteDb>, requester: Arc<SQLiteRequester>) -> Self {
-        Dependencies { db, requester }
+impl ComponentTr for Dependencies {
+    fn create_component(components: &mut ComponentsContainer) -> Arc<Self> {
+        let deps = Dependencies {
+            db: components.get_component_as::<database::SQLiteDb>("sqlite-db"),
+            requester: components.get_component_as::<SQLiteRequester>("sqlite-requester"),
+        };
+
+        return Arc::new(deps);
+    }
+
+    fn component_name(&self) -> &'static str {
+        return "dependencies";
     }
 }

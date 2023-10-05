@@ -1,8 +1,8 @@
 use crate::components_container::{ComponentTr, ComponentsContainer};
+use crate::controllers::handler::GenericError;
 use crate::db::sqlite::database::SQLiteDb;
 use crate::db::sqlite::sql;
 use crate::models::vote::{UserVote, Vote, VoteTemplate};
-use crate::views::handler::GenericError;
 use log::{info, warn};
 use rusqlite::OptionalExtension;
 use std::sync::Arc;

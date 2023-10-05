@@ -1,6 +1,6 @@
 use crate::components_container::{ComponentTr, ComponentsContainer};
+use crate::controllers::handler::GenericError;
 use crate::views::error::RuntimeError;
-use crate::views::handler::GenericError;
 use rusqlite::Connection;
 use std::sync::{Arc, Mutex, MutexGuard};
 

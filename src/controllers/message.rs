@@ -1,7 +1,8 @@
+use crate::controllers;
+use crate::controllers::commands::point_story::to_pointstory_request;
+use crate::controllers::handler::{HandlerTr, MaybeError};
 use crate::dependencies::Dependencies;
 use crate::views::commands;
-use crate::views::handler::HandlerTr;
-use crate::views::handler::MaybeError;
 use async_trait::async_trait;
 use commands::Command;
 use log::info;
@@ -41,21 +42,23 @@ impl HandlerTr<MessageRequest, Dependencies> for Handler {
 impl Handler {
     async fn dispatch(self, request: MessageRequest, dependencies: Dependencies) -> MaybeError {
         let raw_text = match request.message.text() {
-            None => return commands::help::view::handle(request, dependencies).await,
+            None => return controllers::commands::help::handle(request, dependencies).await,
             Some(value) => value,
         };
 
         match BotCommands::parse(raw_text, request.me.username()) {
-            Ok(Command::Help) => commands::help::view::handle(request, dependencies).await?,
-            Ok(Command::Start) => commands::help::view::handle(request, dependencies).await?,
+            Ok(Command::Help) => controllers::commands::help::handle(request, dependencies).await?,
+            Ok(Command::Start) => {
+                controllers::commands::help::handle(request, dependencies).await?
+            }
             Ok(Command::PointStory) => {
-                commands::point_story::view::handle(
-                    commands::point_story::view::to_pointstory_request(request)?,
+                controllers::commands::point_story::handle(
+                    to_pointstory_request(request)?,
                     dependencies,
                 )
                 .await?
             }
-            Err(_) => commands::help::view::handle(request, dependencies).await?,
+            Err(_) => controllers::commands::help::handle(request, dependencies).await?,
         }
 
         Ok(())

@@ -1,9 +1,9 @@
-use crate::actions;
+use crate::controllers::handler::{GenericError, HandlerTr, MaybeError};
+use crate::controllers::message::MessageRequest;
 use crate::dependencies::Dependencies;
 use crate::models::vote::VoteState;
+use crate::views::commands::point_story::keyboard::make_keyboard;
 use crate::views::error::ValidationError;
-use crate::views::handler::{GenericError, HandlerTr, MaybeError};
-use crate::views::message::view::MessageRequest;
 use async_trait::async_trait;
 use log::info;
 use teloxide::payloads::SendMessageSetters;
@@ -66,7 +66,7 @@ impl Handler {
         request: &PointStoryRequest,
         _: &Dependencies,
     ) -> Result<Message, GenericError> {
-        let keyboard = actions::point_story::make_keyboard(VoteState::Init);
+        let keyboard = make_keyboard(VoteState::Init);
         let text = &request.text;
         let mut response = request
             .data

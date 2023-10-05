@@ -1,7 +1,6 @@
+use crate::controllers::callbacks::CallbackRequest;
+use crate::controllers::handler::{HandlerTr, MaybeError};
 use crate::dependencies::Dependencies;
-use crate::views::callback::request::CallbackRequest;
-use crate::views::handler::HandlerTr;
-use crate::views::handler::MaybeError;
 use async_trait::async_trait;
 use teloxide::requests::Requester;
 

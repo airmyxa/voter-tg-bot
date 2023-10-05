@@ -31,18 +31,27 @@ impl ComponentsContainer {
     where
         T: ComponentTr,
     {
+        if self.components_map.contains_key(&name) {
+            return self.get_existing_component::<T>(&name);
+        }
+
         let required_component = T::create_component(self);
         self.add_component::<T>(required_component);
 
-        let result = self
+        return self.get_existing_component::<T>(&name);
+    }
+
+    fn get_existing_component<T>(&mut self, name: &str) -> Arc<T>
+    where
+        T: ComponentTr,
+    {
+        return self
             .components_map
-            .get(name)
+            .get(&name)
             .unwrap()
             .clone()
             .downcast::<T>()
             .unwrap();
-
-        return result;
     }
 }
 

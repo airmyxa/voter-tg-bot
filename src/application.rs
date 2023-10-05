@@ -1,6 +1,6 @@
 use crate::components_container::ComponentsContainer;
 use crate::dependencies::Dependencies;
-use crate::views;
+use crate::{controllers, views};
 use std::ops::Deref;
 use std::sync::Arc;
 use teloxide::dispatching::{Dispatcher, UpdateFilterExt};
@@ -39,7 +39,7 @@ impl Application {
         let handler = dptree::entry()
             .branch(
                 Update::filter_message().endpoint(move |bot: Bot, message: Message, me: Me| {
-                    return views::message::handle(
+                    return controllers::message::handle(
                         bot,
                         message,
                         me,
@@ -49,7 +49,7 @@ impl Application {
             )
             .branch(Update::filter_callback_query().endpoint(
                 move |bot: Bot, query: CallbackQuery| {
-                    return views::callback::view::handle(
+                    return controllers::callbacks::handle(
                         bot,
                         query,
                         self.dependencies.deref().clone(),

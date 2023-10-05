@@ -1,11 +1,12 @@
-mod actions;
 mod application;
 mod components;
 mod components_container;
-mod controller;
+mod controllers;
 mod db;
 mod dependencies;
 mod models;
+mod services;
+mod storage;
 mod views;
 
 use crate::application::Application;

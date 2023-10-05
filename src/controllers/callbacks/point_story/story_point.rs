@@ -1,11 +1,10 @@
-use crate::actions;
+use crate::controllers::callbacks::CallbackRequest;
+use crate::controllers::handler::{GenericError, HandlerTr, MaybeError};
 use crate::dependencies::Dependencies;
 use crate::models::point_story::text::InProgressText;
 use crate::models::vote::VoteState;
-use crate::views::callback::request::CallbackRequest;
+use crate::views;
 use crate::views::error::ValidationError;
-use crate::views::handler::MaybeError;
-use crate::views::handler::{GenericError, HandlerTr};
 use async_trait::async_trait;
 use teloxide::payloads::EditMessageTextSetters;
 use teloxide::requests::Requester;
@@ -81,7 +80,9 @@ impl Handler {
             .extra
             .bot
             .edit_message_text(message.chat.id, message.id, new_text.to_string())
-            .reply_markup(actions::point_story::make_keyboard(VoteState::InProcess))
+            .reply_markup(views::commands::point_story::keyboard::make_keyboard(
+                VoteState::InProcess,
+            ))
             .await?;
 
         request

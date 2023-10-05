@@ -1,9 +1,8 @@
+use crate::controllers::callbacks::CallbackRequest;
+use crate::controllers::handler::{GenericError, HandlerTr, MaybeError};
 use crate::dependencies::Dependencies;
 use crate::models::point_story::text::ResultText;
-use crate::views::callback::request::CallbackRequest;
 use crate::views::error::ValidationError;
-use crate::views::handler::MaybeError;
-use crate::views::handler::{GenericError, HandlerTr};
 use async_trait::async_trait;
 use teloxide::requests::Requester;
 use teloxide::types::Message;

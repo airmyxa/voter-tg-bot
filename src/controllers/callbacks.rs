@@ -1,15 +1,23 @@
+pub mod point_story;
+
+use crate::controllers;
+use crate::controllers::handler::{GenericError, HandlerTr, MaybeError};
 use crate::dependencies::Dependencies;
-use crate::views::callback::point_story;
-use crate::views::callback::request::CallbackRequest;
-use crate::views::callback::view::CallbackForTemplate::PointStory;
 use crate::views::error::ValidationError;
-use crate::views::handler::MaybeError;
-use crate::views::handler::{GenericError, HandlerTr};
 use async_trait::async_trait;
 use log::info;
 use teloxide::requests::Requester;
-use teloxide::types::CallbackQuery;
+use teloxide::types::{CallbackQuery, Message};
 use teloxide::Bot;
+
+#[derive(Debug)]
+pub struct CallbackRequest {
+    pub bot: Bot,
+    pub message: Message,
+    pub text: String,
+    pub data: String,
+    pub query: CallbackQuery,
+}
 
 enum CallbackForTemplate {
     PointStory,
@@ -71,7 +79,9 @@ impl Handler {
             .await?;
 
         match self.get_message_template(&request, &dependencies)? {
-            PointStory => point_story::view::handle(request, dependencies).await?,
+            CallbackForTemplate::PointStory => {
+                controllers::callbacks::point_story::handle(request, dependencies).await?
+            }
         }
 
         Ok(())

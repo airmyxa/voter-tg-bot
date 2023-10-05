@@ -1,7 +1,7 @@
+use crate::controllers::handler::{HandlerTr, MaybeError};
+use crate::controllers::message::MessageRequest;
 use crate::dependencies::Dependencies;
 use crate::views::commands::Command;
-use crate::views::handler::{HandlerTr, MaybeError};
-use crate::views::message::view::MessageRequest;
 use async_trait::async_trait;
 use log::info;
 use teloxide::requests::Requester;

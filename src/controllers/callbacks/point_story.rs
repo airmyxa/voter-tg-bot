@@ -1,10 +1,14 @@
+mod dismiss;
+mod open;
+mod story_point;
+
+use crate::controllers;
+use crate::controllers::callbacks::point_story::open::to_open_callback_request;
+use crate::controllers::callbacks::point_story::story_point::to_story_point_request;
+use crate::controllers::callbacks::CallbackRequest;
+use crate::controllers::handler::{HandlerTr, MaybeError};
 use crate::dependencies::Dependencies;
 use crate::views::callback::point_story;
-use crate::views::callback::point_story::open::view::to_open_callback_request;
-use crate::views::callback::point_story::story_point::view::to_story_point_request;
-use crate::views::callback::request::CallbackRequest;
-use crate::views::handler::HandlerTr;
-use crate::views::handler::MaybeError;
 use async_trait::async_trait;
 
 enum CallbackAction {
@@ -40,17 +44,17 @@ impl Handler {
         if let Some(data) = &request.query.data {
             match detect_callback_action(&data) {
                 Some(CallbackAction::PointStory) => {
-                    point_story::story_point::view::handle(
+                    controllers::callbacks::point_story::story_point::handle(
                         to_story_point_request(request)?,
                         dependencies,
                     )
                     .await?
                 }
                 Some(CallbackAction::Dismiss) => {
-                    point_story::dismiss::view::handle(request, dependencies).await?;
+                    controllers::callbacks::point_story::handle(request, dependencies).await?;
                 }
                 Some(CallbackAction::Open) => {
-                    point_story::open::view::handle(
+                    controllers::callbacks::point_story::open::handle(
                         to_open_callback_request(request)?,
                         dependencies,
                     )

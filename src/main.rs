@@ -1,5 +1,4 @@
 mod application;
-mod components;
 mod components_container;
 mod controllers;
 mod db;

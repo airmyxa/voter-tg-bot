@@ -1,4 +1,4 @@
-use crate::components_container::{ComponentTr, ComponentsContainer};
+use crate::components_container::{Component, ComponentsContainer};
 use crate::controllers::handler::GenericError;
 use crate::db::sqlite::database::SQLiteDb;
 use crate::db::sqlite::sql;
@@ -8,14 +8,14 @@ use rusqlite::OptionalExtension;
 use std::sync::Arc;
 
 pub struct SQLiteRequester {
-    db: Arc<SQLiteDb>,
+    db: &'static SQLiteDb,
 }
 
-impl ComponentTr for SQLiteRequester {
-    fn create_component(components: &mut ComponentsContainer) -> Arc<Self> {
+impl Component for SQLiteRequester {
+    fn create_component(components: &mut ComponentsContainer) -> Self {
         let db = components.get_component_as::<SQLiteDb>("sqlite-db");
         let requester = SQLiteRequester { db };
-        return Arc::new(requester);
+        return requester;
     }
 
     fn component_name(&self) -> &'static str {
@@ -24,7 +24,7 @@ impl ComponentTr for SQLiteRequester {
 }
 
 impl SQLiteRequester {
-    pub fn new(db: Arc<SQLiteDb>) -> Self {
+    pub fn new(db: &'static SQLiteDb) -> Self {
         SQLiteRequester { db }
     }
 
@@ -190,15 +190,16 @@ impl SQLiteRequester {
     ) -> Result<Option<VoteTemplate>, GenericError> {
         let connection = self.db.get_connection()?;
         let mut statement = connection.prepare(sql::SELECT_VOTE_TEMPLATE_BY_MESSAGE)?;
-        let result = statement
-            .query_row(&[&chat_id, &message_id], |row| {
-                let id = row.get(0)?;
-                let invoke_command = row.get(1)?;
+        let result =
+            statement
+                .query_row(&[&chat_id, &message_id], |row| {
+                    let id = row.get(0)?;
+                    let invoke_command = row.get(1)?;
 
-                let result = VoteTemplate { id, invoke_command };
-                return Ok(result);
-            })
-            .optional()?;
+                    let result = VoteTemplate { id, invoke_command };
+                    return Ok(result);
+                })
+                .optional()?;
         return Ok(result);
     }
 }

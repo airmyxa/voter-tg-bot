@@ -11,7 +11,11 @@ struct Handler {}
 
 #[async_trait]
 impl HandlerTr<MessageRequest, Dependencies> for Handler {
-    async fn handle(self, request: MessageRequest, dependencies: Dependencies) -> MaybeError {
+    async fn handle(
+        self,
+        request: MessageRequest,
+        dependencies: Dependencies,
+    ) -> MaybeError {
         info!("Start handling help request",);
         self.send_help_message(request, dependencies).await?;
         Ok(())
@@ -19,7 +23,11 @@ impl HandlerTr<MessageRequest, Dependencies> for Handler {
 }
 
 impl Handler {
-    async fn send_help_message(self, request: MessageRequest, _: Dependencies) -> MaybeError {
+    async fn send_help_message(
+        self,
+        request: MessageRequest,
+        _: Dependencies,
+    ) -> MaybeError {
         let thread_id = request.message.thread_id;
         let mut request = request
             .bot

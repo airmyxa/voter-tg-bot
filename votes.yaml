@@ -1,0 +1,27 @@
+templates:
+  - name: point_story
+    command: point_story
+    keyboard_markup:
+      active_vote:
+        - ["1", "2", "3"]
+        - ["5", "8", "13"]
+        - ["open", "dismiss"]
+      inactive_vote:
+        - ["reopen", "dismiss"]
+    vote_actions:
+      - callback_values: ["1", "2", "3", "5", "8", "13"]
+        actions:
+          - user_vote
+
+      - callback_values: ["open"]
+        actions:
+          - open_vote
+
+      - callback_values: ["dismiss"]
+        actions:
+          - dismiss_vote
+
+      - callback_values: ["reopen"]
+        actions:
+          - dismiss_vote
+          - new_vote

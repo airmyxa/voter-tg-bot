@@ -1,25 +1,38 @@
-use crate::components_container::{ComponentTr, ComponentsContainer};
+use crate::components_container::{Component, ComponentsContainer};
 use crate::db::sqlite::database;
 use crate::db::sqlite::requester::SQLiteRequester;
+use std::ops::Deref;
 use std::sync::Arc;
 
 #[derive(Clone)]
-pub struct Dependencies {
-    pub db: Arc<database::SQLiteDb>,
-    pub requester: Arc<SQLiteRequester>,
+pub struct DependenciesComponent {
+    db: &'static database::SQLiteDb,
+    db_requester: &'static SQLiteRequester,
 }
 
-impl ComponentTr for Dependencies {
-    fn create_component(components: &mut ComponentsContainer) -> Arc<Self> {
-        let deps = Dependencies {
+pub struct Dependencies {
+    pub db_requester: &'static SQLiteRequester,
+}
+
+impl Component for DependenciesComponent {
+    fn create_component(components: &mut ComponentsContainer) -> Self {
+        let deps = DependenciesComponent {
             db: components.get_component_as::<database::SQLiteDb>("sqlite-db"),
-            requester: components.get_component_as::<SQLiteRequester>("sqlite-requester"),
+            db_requester: components.get_component_as::<SQLiteRequester>("sqlite-requester"),
         };
 
-        return Arc::new(deps);
+        return deps;
     }
 
     fn component_name(&self) -> &'static str {
         return "dependencies";
+    }
+}
+
+impl DependenciesComponent {
+    pub fn dependencies(&self) -> Dependencies {
+        Dependencies {
+            db_requester: self.db_requester.deref(),
+        }
     }
 }

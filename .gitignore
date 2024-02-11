@@ -2,3 +2,7 @@
 sec.json
 *.db
 *.xml
+.vscode/
+.idea/
+.git/
+

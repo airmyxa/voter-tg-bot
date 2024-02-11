@@ -1,6 +1,6 @@
 use crate::controllers::handler::{GenericError, HandlerTr, MaybeError};
 use crate::controllers::message::MessageRequest;
-use crate::dependencies::Dependencies;
+use crate::dependencies::{Dependencies, Dependencies};
 use crate::models::vote::VoteState;
 use crate::views::commands::point_story::keyboard::make_keyboard;
 use crate::views::error::ValidationError;
@@ -49,7 +49,7 @@ impl HandlerTr<PointStoryRequest, Dependencies> for Handler {
             chat_id, message_id, request.text
         );
 
-        dependencies.requester.insert_vote(
+        dependencies.db_requester.insert_vote(
             &chat_id,
             &message_id,
             &request.text,
@@ -113,8 +113,8 @@ pub fn to_pointstory_request(request: MessageRequest) -> Result<PointStoryReques
             };
             Ok(result)
         }
-        None => Err(Box::new(ValidationError::new(String::from(
-            "Pointstory request parse error. Text is required field",
-        )))),
+        None => Err(Box::new(ValidationError::new(
+            String::from("Pointstory request parse error. Text is required field")
+        ))),
     };
 }

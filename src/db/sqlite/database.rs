@@ -1,4 +1,4 @@
-use crate::components_container::{ComponentTr, ComponentsContainer};
+use crate::components_container::{Component, ComponentsContainer};
 use crate::controllers::handler::GenericError;
 use crate::views::error::RuntimeError;
 use rusqlite::Connection;
@@ -51,8 +51,8 @@ pub struct SQLiteDb {
     connection: SQLiteConnection,
 }
 
-impl ComponentTr for SQLiteDb {
-    fn create_component(components: &mut ComponentsContainer) -> Arc<Self> {
+impl Component for SQLiteDb {
+    fn create_component(components: &mut ComponentsContainer) -> Self {
         let connection = SQLiteConnectionType::File(String::from("voter.db"));
         let settings = SQLiteSettings::new(connection);
         let connection = match &settings.connection_type {
@@ -64,7 +64,7 @@ impl ComponentTr for SQLiteDb {
             settings,
             connection: SQLiteConnection::new(connection),
         };
-        return Arc::new(db);
+        return db;
     }
 
     fn component_name(&self) -> &'static str {

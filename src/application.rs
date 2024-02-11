@@ -1,5 +1,5 @@
 use crate::components_container::ComponentsContainer;
-use crate::dependencies::Dependencies;
+use crate::dependencies::DependenciesComponent;
 use crate::{controllers, views};
 use std::ops::Deref;
 use std::sync::Arc;
@@ -9,13 +9,13 @@ use teloxide::{dptree, Bot};
 
 pub struct Application {
     components: ComponentsContainer,
-    dependencies: Arc<Dependencies>,
+    dependencies: &'static DependenciesComponent,
 }
 
 impl Application {
     pub fn new() -> Self {
         let mut components = ComponentsContainer::new();
-        let dependencies = components.get_component_as::<Dependencies>("dependencies");
+        let dependencies = components.get_component_as::<DependenciesComponent>("dependencies");
         Application {
             components,
             dependencies,
@@ -43,7 +43,7 @@ impl Application {
                         bot,
                         message,
                         me,
-                        self.dependencies.deref().clone(),
+                        self.dependencies.dependencies(),
                     );
                 }),
             )
@@ -52,7 +52,7 @@ impl Application {
                     return controllers::callbacks::handle(
                         bot,
                         query,
-                        self.dependencies.deref().clone(),
+                        self.dependencies.dependencies(),
                     );
                 },
             ));

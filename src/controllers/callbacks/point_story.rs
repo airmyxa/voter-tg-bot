@@ -15,17 +15,24 @@ enum CallbackAction {
     PointStory,
     Dismiss,
     Open,
+    NoAction,
 }
 
-fn detect_callback_action(text: &str) -> Option<CallbackAction> {
+impl std::convert::From<&str> for CallbackAction {
+    fn from(value: &str) -> Self {
+        return detect_callback_action(value);
+    }
+}
+
+fn detect_callback_action(text: &str) -> CallbackAction {
     if text.parse::<i32>().is_ok() {
-        return Some(CallbackAction::PointStory);
+        return CallbackAction::PointStory;
     }
 
     return match text {
-        "Dismiss" => Some(CallbackAction::Dismiss),
-        "Open" => Some(CallbackAction::Open),
-        _ => None,
+        "Dismiss" => CallbackAction::Dismiss,
+        "Open" => CallbackAction::Open,
+        _ => CallbackAction::NoAction,
     };
 }
 
@@ -33,34 +40,42 @@ struct Handler {}
 
 #[async_trait]
 impl HandlerTr<CallbackRequest, Dependencies> for Handler {
-    async fn handle(self, request: CallbackRequest, dependencies: Dependencies) -> MaybeError {
+    async fn handle(
+        self,
+        request: CallbackRequest,
+        dependencies: Dependencies,
+    ) -> MaybeError {
         self.dispatch(request, dependencies).await?;
         Ok(())
     }
 }
 
 impl Handler {
-    async fn dispatch(self, request: CallbackRequest, dependencies: Dependencies) -> MaybeError {
+    async fn dispatch(
+        self,
+        request: CallbackRequest,
+        dependencies: Dependencies,
+    ) -> MaybeError {
         if let Some(data) = &request.query.data {
             match detect_callback_action(&data) {
-                Some(CallbackAction::PointStory) => {
+                CallbackAction::PointStory => {
                     controllers::callbacks::point_story::story_point::handle(
                         to_story_point_request(request)?,
                         dependencies,
                     )
                     .await?
                 }
-                Some(CallbackAction::Dismiss) => {
+                CallbackAction::Dismiss => {
                     controllers::callbacks::point_story::handle(request, dependencies).await?;
                 }
-                Some(CallbackAction::Open) => {
+                CallbackAction::Open => {
                     controllers::callbacks::point_story::open::handle(
                         to_open_callback_request(request)?,
                         dependencies,
                     )
                     .await?;
                 }
-                None => {
+                CallbackAction::NoAction => {
                     return Ok(());
                 }
             }

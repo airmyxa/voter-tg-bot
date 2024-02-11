@@ -1,10 +1,14 @@
-use crate::{components_container::ComponentsContainer, models::point_story::keyboard::Keyboard};
+use crate::{
+    components_container::ComponentsContainer,
+    models::point_story::keyboard::Keyboard,
+    tg::requester::{self, InitVoteRequest, Requester},
+};
 use std::sync::Arc;
 
 use crate::components_container::Component;
+use teloxide::payloads::SendMessageSetters;
+use teloxide::requests::Requester;
 use teloxide::Bot;
-use teloxide::{payloads::SendMessageSetters, types::ChatId};
-use teloxide::{requests::Requester, types::InlineKeyboardMarkup};
 
 pub struct InitVoteRequest {
     pub text: String,
@@ -19,9 +23,7 @@ pub struct TgRequester {
 
 impl Component for TgRequester {
     fn create_component(components: &mut ComponentsContainer) -> Self {
-        TgRequester {
-            bot: Bot::from_env(),
-        }
+        Bot::from_env();
     }
 
     fn component_name(&self) -> &'static str {
@@ -30,11 +32,11 @@ impl Component for TgRequester {
 }
 
 impl TgRequester {
-    async fn send_vote(&self, request: InitVoteRequest) -> anyhow::Result<()> {
+    fn send_vote(&self, request: InitVoteRequest) -> anyhow::Result<()> {
         let mut tg_request = self
             .bot
-            .send_message(ChatId(request.chat_id), request.text)
-            .reply_markup(InlineKeyboardMarkup::from(request.keyboard));
+            .send_message(request.chat_id, request.text)
+            .reply_markup(request.keyboard.into());
         tg_request.message_thread_id = request.thread_id;
         tg_request.await?;
         Ok(())

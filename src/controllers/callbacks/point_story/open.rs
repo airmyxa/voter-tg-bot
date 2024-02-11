@@ -1,6 +1,6 @@
 use crate::controllers::callbacks::CallbackRequest;
 use crate::controllers::handler::{GenericError, HandlerTr, MaybeError};
-use crate::dependencies::Dependencies;
+use crate::dependencies::DependenciesComponent;
 use crate::models::point_story::text::ResultText;
 use crate::views::error::ValidationError;
 use async_trait::async_trait;
@@ -16,15 +16,23 @@ pub struct OpenCallbackRequest {
 struct Handler {}
 
 #[async_trait]
-impl HandlerTr<OpenCallbackRequest, Dependencies> for Handler {
-    async fn handle(self, request: OpenCallbackRequest, dependencies: Dependencies) -> MaybeError {
+impl HandlerTr<OpenCallbackRequest, Dependenciesfor Handler {
+    async fn handle(
+        self,
+        request: OpenCallbackRequest,
+        dependencies: DependenciesComponent,
+    ) -> MaybeError {
         self.process(request, dependencies).await?;
         Ok(())
     }
 }
 
 impl Handler {
-    async fn process(self, request: OpenCallbackRequest, dependencies: Dependencies) -> MaybeError {
+    async fn process(
+        self,
+        request: OpenCallbackRequest,
+        dependencies: DependenciesComponent,
+    ) -> MaybeError {
         let chat_id = request.message.chat.id.to_string();
         let message_id = request.message.id.to_string();
 
@@ -65,7 +73,10 @@ impl Handler {
     }
 }
 
-pub async fn handle(request: OpenCallbackRequest, dependencies: Dependencies) -> MaybeError {
+pub async fn handle(
+    request: OpenCallbackRequest,
+    dependencies: DependenciesComponent,
+) -> MaybeError {
     let handler = Handler {};
     handler.handle(request, dependencies).await?;
     Ok(())
@@ -82,8 +93,8 @@ pub fn to_open_callback_request(
             };
             Ok(result)
         }
-        None => Err(Box::new(ValidationError::new(String::from(
-            "Open callback request parse error. Text is required field.",
-        )))),
+        None => Err(Box::new(ValidationError::new(
+            String::from("Open callback request parse error. Text is required field.")
+        ))),
     };
 }

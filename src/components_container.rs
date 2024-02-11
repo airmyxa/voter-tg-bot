@@ -1,9 +1,8 @@
 use std::any::Any;
 use std::collections::HashMap;
 use std::ops::Deref;
-use std::sync::Arc;
 
-pub trait Component: Send + Sync {
+pub trait Component: Send + Sync + 'static {
     fn create_component(components: &mut ComponentsContainer) -> Self
     where
         Self: Sized;
@@ -12,7 +11,7 @@ pub trait Component: Send + Sync {
 }
 
 pub struct ComponentsContainer {
-    components_map: HashMap<&'static str, Arc<dyn Any + Send + Sync>>,
+    components_map: HashMap<&'static str, Box<dyn Component>>,
 }
 
 impl ComponentsContainer {
@@ -22,40 +21,39 @@ impl ComponentsContainer {
         }
     }
 
-    pub fn add_component<T>(&mut self, name: &'static str)
+    pub fn add_component<T>(&mut self, name: &str)
     where
-        T: Component + 'static,
+        T: Component,
     {
-        self.get_component_as::<T>(name);
+        let _ = self.get_component_as(name);
     }
 
-    pub fn get_component_as<T>(&mut self, name: &'static str) -> Arc<T>
+    pub fn get_component_as<T>(&mut self, name: &str) -> &'static T
     where
-        T: Component + 'static,
+        T: Component,
     {
         if self.components_map.contains_key(&name) {
             return self.get_existing_component::<T>(&name).clone();
         }
 
-        let required_component = Arc::new(T::create_component(self));
-        let component_name = T::component_name(&required_component);
+        let required_component = Box::new(T::create_component(self));
         self.components_map
-            .insert(component_name, required_component.clone());
+            .insert(T::component_name(&self), component);
 
         return self.get_existing_component::<T>(&name).clone();
     }
 
-    fn get_existing_component<T>(&mut self, name: &'static str) -> Arc<T>
+    fn get_existing_component<T>(&mut self, name: &str) -> &'static T
     where
-        T: Component + 'static,
+        T: Component,
     {
         return self
             .components_map
             .get(&name)
             .unwrap()
-            .clone()
             .downcast::<T>()
-            .unwrap();
+            .unwrap()
+            .deref();
     }
 }
 
@@ -76,13 +74,19 @@ mod tests {
     }
 
     struct RequesterComponent {
-        db: Arc<DbComponent>,
+        db: DbComponent,
+    }
+
+    impl RequesterComponent {
+        pub fn new(db: &'static DbComponent) -> Self {
+            RequesterComponent { db }
+        }
     }
 
     impl Component for RequesterComponent {
         fn create_component(components: &mut ComponentsContainer) -> Self {
             let db = components.get_component_as::<DbComponent>("db-component");
-            let requester = RequesterComponent { db };
+            let requester = RequesterComponent::new(db);
             return requester;
         }
 

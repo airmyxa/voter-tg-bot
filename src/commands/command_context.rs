@@ -7,6 +7,6 @@ pub struct CommandParams {
     pub thread_id: i64,
 }
 
-pub struct CommandDependencies<'a> {
-    requester: &'a TgRequester,
+pub struct CommandDependencies {
+    requester: &'static TgRequester,
 }

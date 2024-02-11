@@ -9,7 +9,7 @@ use teloxide::{dptree, Bot};
 
 pub struct Application {
     components: ComponentsContainer,
-    dependencies: Arc<DependenciesComponent>,
+    dependencies: &'static DependenciesComponent,
 }
 
 impl Application {

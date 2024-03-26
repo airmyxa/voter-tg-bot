@@ -28,11 +28,7 @@ struct Handler {}
 
 #[async_trait]
 impl HandlerTr<MessageRequest, Dependencies> for Handler {
-    async fn handle(
-        self,
-        request: MessageRequest,
-        dependencies: Dependencies,
-    ) -> MaybeError {
+    async fn handle(self, request: MessageRequest, dependencies: Dependencies) -> MaybeError {
         info!(
             "Start handling message request.\
                text={}",
@@ -44,11 +40,7 @@ impl HandlerTr<MessageRequest, Dependencies> for Handler {
 }
 
 impl Handler {
-    async fn dispatch(
-        self,
-        request: MessageRequest,
-        dependencies: Dependencies,
-    ) -> MaybeError {
+    async fn dispatch(self, request: MessageRequest, dependencies: Dependencies) -> MaybeError {
         let raw_text = match request.message.text() {
             None => return controllers::commands::help::handle(request, dependencies).await,
             Some(value) => value,
@@ -73,12 +65,7 @@ impl Handler {
     }
 }
 
-pub async fn handle(
-    bot: Bot,
-    message: Message,
-    me: Me,
-    dependencies: Dependencies,
-) -> MaybeError {
+pub async fn handle(bot: Bot, message: Message, me: Me, dependencies: Dependencies) -> MaybeError {
     let handler = Handler {};
 
     handler

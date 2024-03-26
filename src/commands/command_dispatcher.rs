@@ -10,7 +10,7 @@ use super::{
 };
 
 pub struct CommandDispatcher {
-    command_container: HashMap<&'static str, &dyn Command>,
+    command_container: HashMap<&'static str, Box<dyn Command>>,
 }
 
 impl Component for CommandDispatcher {
@@ -26,15 +26,17 @@ impl Component for CommandDispatcher {
 }
 
 impl CommandDispatcher {
-    pub fn add_command<C: CommandFactory>(&mut self, command_factory: C) {
+    pub fn add_command(&mut self, command_factory: &dyn CommandFactory) {
+        let command = command_factory.create_command();
+        let command_str = command.command_str();
         if self
             .command_container
-            .insert(command, C::command_str())
+            .insert(command_str, command)
             .is_none()
         {
             panic!(
                 "Should not add same command more than once: {}",
-                C::command_str()
+                command_str
             );
         };
     }

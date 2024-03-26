@@ -1,15 +1,11 @@
 use super::command_context::{CommandDependencies, CommandParams};
 
 pub trait Command: Sync + Send {
-    fn command_str() -> &'static str
-    where
-        Self: Sized;
+    fn command_str(&self) -> &'static str;
 
-    fn handle(params: CommandParams, deps: CommandDependencies) -> anyhow::Result<()>
-    where
-        Self: Sized;
+    fn handle(&self, params: CommandParams, deps: CommandDependencies) -> anyhow::Result<()>;
 }
 
 pub trait CommandFactory {
-    fn create_command() -> Box<dyn Command>;
+    fn create_command(&self) -> Box<dyn Command>;
 }

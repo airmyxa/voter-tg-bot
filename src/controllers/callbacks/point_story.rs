@@ -40,22 +40,14 @@ struct Handler {}
 
 #[async_trait]
 impl HandlerTr<CallbackRequest, Dependencies> for Handler {
-    async fn handle(
-        self,
-        request: CallbackRequest,
-        dependencies: Dependencies,
-    ) -> MaybeError {
+    async fn handle(self, request: CallbackRequest, dependencies: Dependencies) -> MaybeError {
         self.dispatch(request, dependencies).await?;
         Ok(())
     }
 }
 
 impl Handler {
-    async fn dispatch(
-        self,
-        request: CallbackRequest,
-        dependencies: Dependencies,
-    ) -> MaybeError {
+    async fn dispatch(self, request: CallbackRequest, dependencies: Dependencies) -> MaybeError {
         if let Some(data) = &request.query.data {
             match detect_callback_action(&data) {
                 CallbackAction::PointStory => {
@@ -66,7 +58,8 @@ impl Handler {
                     .await?
                 }
                 CallbackAction::Dismiss => {
-                    controllers::callbacks::point_story::handle(request, dependencies).await?;
+                    controllers::callbacks::point_story::dismiss::handle(request, dependencies)
+                        .await?;
                 }
                 CallbackAction::Open => {
                     controllers::callbacks::point_story::open::handle(

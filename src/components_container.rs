@@ -1,9 +1,12 @@
 use std::any::Any;
 use std::collections::HashMap;
+use std::ops::Deref;
 use std::sync::Arc;
 
-pub trait ComponentTr: Send + Sync + 'static {
-    fn create_component(components: &mut ComponentsContainer) -> Arc<Self>;
+pub trait Component: Send + Sync {
+    fn create_component(components: &mut ComponentsContainer) -> Self
+    where
+        Self: Sized;
 
     fn component_name(&self) -> &'static str;
 }
@@ -19,31 +22,32 @@ impl ComponentsContainer {
         }
     }
 
-    pub fn add_component<T>(&mut self, component: Arc<T>)
+    pub fn add_component<T>(&mut self, name: &'static str)
     where
-        T: ComponentTr,
+        T: Component + 'static,
     {
-        self.components_map
-            .insert(component.component_name(), component);
+        self.get_component_as::<T>(name);
     }
 
-    pub fn get_component_as<T>(&mut self, name: &str) -> Arc<T>
+    pub fn get_component_as<T>(&mut self, name: &'static str) -> Arc<T>
     where
-        T: ComponentTr,
+        T: Component + 'static,
     {
         if self.components_map.contains_key(&name) {
-            return self.get_existing_component::<T>(&name);
+            return self.get_existing_component::<T>(&name).clone();
         }
 
-        let required_component = T::create_component(self);
-        self.add_component::<T>(required_component);
+        let required_component = Arc::new(T::create_component(self));
+        let component_name = T::component_name(&required_component);
+        self.components_map
+            .insert(component_name, required_component.clone());
 
-        return self.get_existing_component::<T>(&name);
+        return self.get_existing_component::<T>(&name).clone();
     }
 
-    fn get_existing_component<T>(&mut self, name: &str) -> Arc<T>
+    fn get_existing_component<T>(&mut self, name: &'static str) -> Arc<T>
     where
-        T: ComponentTr,
+        T: Component + 'static,
     {
         return self
             .components_map
@@ -57,14 +61,13 @@ impl ComponentsContainer {
 
 #[cfg(test)]
 mod tests {
-    use crate::components_container::{ComponentTr, ComponentsContainer};
-    use std::sync::Arc;
+    use crate::components_container::{Component, ComponentsContainer};
 
     struct DbComponent {}
 
-    impl ComponentTr for DbComponent {
-        fn create_component(components: &mut ComponentsContainer) -> Arc<Self> {
-            return Arc::new(DbComponent {});
+    impl Component for DbComponent {
+        fn create_component(components: &mut ComponentsContainer) -> Self {
+            return DbComponent {};
         }
 
         fn component_name(&self) -> &'static str {
@@ -76,17 +79,11 @@ mod tests {
         db: Arc<DbComponent>,
     }
 
-    impl RequesterComponent {
-        pub fn new(db: Arc<DbComponent>) -> Self {
-            RequesterComponent { db: db }
-        }
-    }
-
-    impl ComponentTr for RequesterComponent {
-        fn create_component(components: &mut ComponentsContainer) -> Arc<Self> {
+    impl Component for RequesterComponent {
+        fn create_component(components: &mut ComponentsContainer) -> Self {
             let db = components.get_component_as::<DbComponent>("db-component");
-            let requester = RequesterComponent::new(db);
-            return Arc::new(requester);
+            let requester = RequesterComponent { db };
+            return requester;
         }
 
         fn component_name(&self) -> &'static str {

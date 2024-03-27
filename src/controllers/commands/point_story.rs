@@ -49,7 +49,7 @@ impl HandlerTr<PointStoryRequest, Dependencies> for Handler {
             chat_id, message_id, request.text
         );
 
-        dependencies.requester.insert_vote(
+        dependencies.db_requester.insert_vote(
             &chat_id,
             &message_id,
             &request.text,

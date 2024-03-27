@@ -1,4 +1,4 @@
-use crate::components_container::{ComponentTr, ComponentsContainer};
+use crate::components_container::{Component, ComponentsContainer};
 use crate::controllers::handler::GenericError;
 use crate::db::sqlite::database::SQLiteDb;
 use crate::db::sqlite::sql;
@@ -11,11 +11,11 @@ pub struct SQLiteRequester {
     db: Arc<SQLiteDb>,
 }
 
-impl ComponentTr for SQLiteRequester {
-    fn create_component(components: &mut ComponentsContainer) -> Arc<Self> {
+impl Component for SQLiteRequester {
+    fn create_component(components: &mut ComponentsContainer) -> Self {
         let db = components.get_component_as::<SQLiteDb>("sqlite-db");
         let requester = SQLiteRequester { db };
-        return Arc::new(requester);
+        return requester;
     }
 
     fn component_name(&self) -> &'static str {

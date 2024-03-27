@@ -29,9 +29,11 @@ impl Handler {
         let message_id = request.message.id.to_string();
 
         let vote_results = dependencies
-            .requester
+            .db_requester
             .select_voted_users(&chat_id, &message_id)?;
-        let vote = dependencies.requester.select_vote(&chat_id, &message_id)?;
+        let vote = dependencies
+            .db_requester
+            .select_vote(&chat_id, &message_id)?;
 
         let vote = if let Some(vote) = vote {
             vote

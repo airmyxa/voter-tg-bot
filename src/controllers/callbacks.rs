@@ -37,7 +37,11 @@ struct Handler {}
 
 #[async_trait]
 impl HandlerTr<CallbackRequest, Dependencies> for Handler {
-    async fn handle(self, request: CallbackRequest, dependencies: Dependencies) -> MaybeError {
+    async fn handle(
+        self,
+        request: CallbackRequest,
+        dependencies: Dependencies,
+    ) -> MaybeError {
         info!(
             "Start handling callback request:\n \
                callback={},\n \
@@ -60,7 +64,7 @@ impl Handler {
         let message_id = &request.message.id.to_string();
 
         let vote_template = dependencies
-            .requester
+            .db_requester
             .select_vote_template_by_message(&chat_id, &message_id)?;
         if let Some(vote_template) = &vote_template {
             return parse_callback_from_invoke_command(&vote_template.invoke_command);
@@ -72,7 +76,11 @@ impl Handler {
         }
     }
 
-    async fn dispatch(&self, request: CallbackRequest, dependencies: Dependencies) -> MaybeError {
+    async fn dispatch(
+        &self,
+        request: CallbackRequest,
+        dependencies: Dependencies,
+    ) -> MaybeError {
         request
             .bot
             .answer_callback_query(request.query.id.clone())
@@ -88,31 +96,35 @@ impl Handler {
     }
 }
 
-pub async fn handle(bot: Bot, query: CallbackQuery, dependencies: Dependencies) -> MaybeError {
+pub async fn handle(
+    bot: Bot,
+    query: CallbackQuery,
+    dependencies: Dependencies,
+) -> MaybeError {
     let message = if let Some(message) = &query.message {
         message
     } else {
-        return Err(Box::new(ValidationError::new(String::from(
-            "Cannot process vote without message object",
-        ))));
+        return Err(Box::new(
+            ValidationError::new(String::from("Cannot process vote without message object"))
+        ));
     }
     .clone();
 
     let text = if let Some(text) = message.text() {
         text
     } else {
-        return Err(Box::new(ValidationError::new(String::from(
-            "Cannot process vote without text",
-        ))));
+        return Err(
+            Box::new(ValidationError::new(String::from("Cannot process vote without text")))
+        );
     }
     .to_string();
 
     let data = if let Some(data) = &query.data {
         data
     } else {
-        return Err(Box::new(ValidationError::new(String::from(
-            "Cannot process vote without query data",
-        ))));
+        return Err(
+            Box::new(ValidationError::new(String::from("Cannot process vote without query data")))
+        );
     }
     .clone();
 

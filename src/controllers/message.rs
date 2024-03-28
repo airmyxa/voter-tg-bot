@@ -58,7 +58,7 @@ impl Handler {
                 )
                 .await?
             }
-            Err(_) => controllers::commands::help::handle(request, dependencies).await?,
+            Err(_) => {}
         }
 
         Ok(())
